@@ -1,0 +1,1 @@
+Error Code: 1701. Cannot truncate a table referenced in a foreign key constraint (`constructor`.`events_items_prices`, CONSTRAINT `events_items_prices_ibfk_1`)

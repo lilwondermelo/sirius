@@ -119,7 +119,22 @@ switch (true) {
     case $result === TRUE:
         die(json_encode(['result' => 'Ok', 'descr' => $obj->error, 'data' => '']));
         break;
-    case $result === FALSE:
+        case $result === FALSE:
+        // --- Логирование ошибки в файл проекта ---
+        $log_dir = dirname(__DIR__, 2) . '/logs';
+        if (!is_dir($log_dir)) {
+            mkdir($log_dir, 0755, true);
+        }
+        $log_file = $log_dir . '/error.log';
+        $log_message = "[" . date("Y-m-d H:i:s") . "] AJAX Error in class '{$class_name}', method '{$method}'.";
+        if (property_exists($obj, 'error') && !empty($obj->error)) {
+            $error_details = is_array($obj->error) ? json_encode($obj->error, JSON_UNESCAPED_UNICODE) : $obj->error;
+            $log_message .= " Details: " . $error_details . "\n";
+        } else {
+            $log_message .= " The method returned FALSE without a specific error message.\n";
+        }
+        error_log($log_message, 3, $log_file);
+        // --- Конец логирования ---
         die(json_encode(['result' => 'Error', 'descr' => $obj->error, 'data' => '']));
         break;
     default:

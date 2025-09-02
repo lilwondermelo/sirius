@@ -33,7 +33,24 @@ class App {
         file_get_contents($url); // пуш ушёл!
     }
 
-    public function getData($type_id) {
+    public function getTypes() {
+        require_once $this->root . '/server/core/_dataSource.class.php';
+        $query = 'SELECT DISTINCT lt.id, lt.name 
+                  FROM list_types lt
+                  INNER JOIN list_items li ON lt.id = li.type_id
+                  ORDER BY lt.id';
+        $dataSource = new DataSource($query);
+        if (!$responseData = $dataSource->getData()) {
+            $this->error = $dataSource->error;
+            return false;
+        }
+        return $responseData;
+    }
+
+    public function getData($jsonData) {
+        $data = json_decode($jsonData, true);
+        $type_id = (int)($data['category'] ?? 0);
+
         require_once $this->root . '/server/core/_dataSource.class.php';
         $query = 'SELECT 
         li.id AS id, 
@@ -45,16 +62,17 @@ class App {
         lu.name as unit,
         "В наличии" as amount
     FROM list_items li
-    JOIN (
+    LEFT JOIN (
         SELECT item_id, MAX(id) AS max_price_id
         FROM events_items_prices
         GROUP BY item_id
     ) AS latest_price ON li.id = latest_price.item_id
-    JOIN events_items_prices eip ON eip.id = latest_price.max_price_id 
-    JOIN list_units lu ON lu.id = li.unit_id
+    LEFT JOIN events_items_prices eip ON eip.id = latest_price.max_price_id 
+    LEFT JOIN list_units lu ON lu.id = li.unit_id
     WHERE li.type_id = ' . $type_id;
         $dataSource = new DataSource($query);
         if (!$responseData = $dataSource->getData()) {
+            $this->error = $dataSource->error;
             return false;
         }
         return $responseData;

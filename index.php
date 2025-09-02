@@ -25,17 +25,11 @@ error_reporting(E_ALL);
 			</div>
 			<div class="flex_row main_menu_row" id="main_menu">
 				<div class="menu_item" cat-id=0>
-					<div class="menu_item_img"><img src="media/images/menu/0.png" alt=""></div>
+					<div class="menu_item_img"><img src="media/images/menu/0.png" alt="">
+					</div>
 					<div class="menu_item_name">Главная</div>
 				</div>
-				<div class="menu_item" cat-id=4>
-					<div class="menu_item_img"><img src="media/images/menu/1.png" alt=""></div>
-					<div class="menu_item_name">Смесители</div>
-				</div>
-				<div class="menu_item" cat-id=18>
-					<div class="menu_item_img"><img src="media/images/menu/2.png" alt=""></div>
-					<div class="menu_item_name">ПП фитинги</div>
-				</div>
+				<!-- Категории будут загружены сюда динамически -->
 			</div>
 			<div class="flex_row main_table_row" id="main_table">
 				

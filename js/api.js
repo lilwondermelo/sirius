@@ -30,7 +30,7 @@ function sendOrderToTelegram() {
 function uploadData(selectedImageFile, selectedImageId) {
     let ajax_smart_data = {
         classFile: 'app.class',
-        className: 'App',
+        class: 'App',
         method: 'editProducts',
         data: { id: selectedImageId, name: $('.edit_name').val() }
     }
@@ -54,7 +54,7 @@ function uploadData(selectedImageFile, selectedImageId) {
 function loadData(category) {
     smartAjaxCall({
         classFile: 'app.class',
-        className: 'App',
+        class: 'App',
         method: 'getData',
         data: { category: category }
     }).then(data => {
@@ -63,8 +63,50 @@ function loadData(category) {
         renderData(category);     // отрисовка как раньше
     })
     .catch(err => {
-        console.error("Ошибка при загрузке данных:", err);
-        showError("Не удалось загрузить данные"); // можешь реализовать отображение
+        // Теперь в консоль выводится весь объект с ошибкой для удобства отладки
+        console.error("Ошибка при загрузке данных:", err); 
+        const errorMessage = err.descr || err.error || "Не удалось загрузить данные";
+        showError(errorMessage); // showError - это ваша функция, она должна быть где-то определена
     });
         
+}
+
+function smartAjaxCall(options) {
+    return new Promise((resolve, reject) => {
+        const formData = new FormData();
+        formData.append('classFile', options.classFile);
+        formData.append('class', options.class);
+        formData.append('method', options.method);
+        formData.append('data', JSON.stringify(options.data));
+
+        if (options.files) {
+            for (const key in options.files) {
+                formData.append(key, options.files[key]);
+            }
+        }
+
+        $.ajax({
+            type: "POST",
+            url: "server/core/_ajaxListener.class.php",
+            data: formData,
+            processData: false,
+            contentType: false,
+        }).done(function (result) {
+            try {
+                const data = JSON.parse(result);
+                if (data.result === "Ok") {
+                    resolve(data.data);
+                } else {
+                    // Отклоняем Promise со всем объектом ответа для детальной отладки
+                    reject(data);
+                }
+            } catch (e) {
+                // Если ответ сервера - не JSON, тоже отклоняем с подробностями
+                reject({ error: "Ошибка парсинга ответа", responseText: result });
+            }
+        }).fail(function (jqXHR, textStatus, errorThrown) {
+            // Ошибка сети
+            reject({ error: `Ошибка сети: ${textStatus}`, details: errorThrown });
+        });
+    });
 }
