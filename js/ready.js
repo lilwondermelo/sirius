@@ -31,7 +31,7 @@ function loadMenu() {
 
         let allCatsHTML = '';
         flatOrderedList.forEach(category => {
-            const imgId = ((category.id - 1) % 2) + 1;
+            const imgId = category.id;
             const isSubcategory = category.parent_id != 0;
             const hidden = isSubcategory ? 'style="display: none;"' : '';
             const subcategoryClass = isSubcategory ? 'subcategory-item' : '';
