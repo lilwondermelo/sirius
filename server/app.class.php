@@ -121,8 +121,12 @@ class App {
         GROUP BY item_id
     ) AS latest_price ON li.id = latest_price.item_id
     LEFT JOIN events_items_prices eip ON eip.id = latest_price.max_price_id 
-    LEFT JOIN list_units lu ON lu.id = li.unit_id
-    WHERE li.type_id = ' . $type_id;
+    LEFT JOIN list_units lu ON lu.id = li.unit_id';
+
+        if ($type_id != 0) {
+            $query .= ' WHERE li.type_id = ' . $type_id;
+        }
+        
         $dataSource = new DataSource($query);
         if (!$responseData = $dataSource->getData()) {
             $this->error = $dataSource->error;

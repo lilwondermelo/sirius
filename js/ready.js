@@ -45,7 +45,11 @@ function loadMenu() {
                 </div>
             `;
         });
+        
         addButton.before(allCatsHTML);
+
+        // Устанавливаем начальное состояние для кнопки "Сириус"
+        $('.menu_item[cat-id=0]').addClass('current-cat');
 
     }).catch(err => {
         console.error("Ошибка при загрузке категорий меню:", err);

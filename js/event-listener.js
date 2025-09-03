@@ -50,10 +50,16 @@ $(document).on('click', '.menu_item:not(.add-new-type-card)', function() {
     const clickedItem = $(this);
     const catId = clickedItem.attr('cat-id');
 
+    // --- Style Update ---
+    $('.menu_item').removeClass('current-cat active-parent');
+    clickedItem.addClass('current-cat');
+    // --- End of Style Update ---
+
     if (catId == '0') {
         // Show all top-level items, hide all sub-items
         $('.dynamic-category:not(.subcategory-item)').show();
         $('.subcategory-item').hide();
+        currentCategory = 0;
         loadData(0);
         return;
     }
@@ -64,12 +70,13 @@ $(document).on('click', '.menu_item:not(.add-new-type-card)', function() {
     // 3. Add the clicked item
     visibleIds.push(catId);
 
-    // 4. Add all ancestors
+    // 4. Add all ancestors and style them
     let parentId = clickedItem.attr('data-type-parent-id');
     while (parentId && parseInt(parentId) != 0) {
         visibleIds.push(parentId);
         const parent = $('.menu_item[cat-id="' + parentId + '"]');
         if (parent.length) {
+            parent.addClass('active-parent'); // Style parent
             parentId = parent.attr('data-type-parent-id');
         } else {
             parentId = null; // stop if parent not found

@@ -87,7 +87,7 @@ function renderData(category) {
     $("#main_table").append(addNewItemCard);
 
     items.forEach((item, index) => {
-        if (item.type == category) {
+        if (category == 0 || item.type == category) {
             renderCard(item);
             renderAddButton(inCart(item.id));
         }

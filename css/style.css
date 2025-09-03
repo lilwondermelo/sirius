@@ -607,6 +607,13 @@
 	}
 }
 
-
+#main_menu .menu_item.current-cat {
+    background-color: #E8F1FA;
+    color: #3483d1;
+    border: 1px solid #3483d1;
 }
 
+#main_menu .menu_item.active-parent {
+    background-color: #F5F5F5;
+    border: 1px solid #ddd;
+}
