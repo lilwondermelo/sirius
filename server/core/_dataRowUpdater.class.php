@@ -89,8 +89,6 @@ class DataRowUpdater {
         $query = $mysql->sqlQuery();
         $fields = [];
         $values = [];
-
-        error_log("DataFields in insert: " . print_r($this->dataFields, true) . "\n", 3, dirname(__DIR__, 2) . '/logs/debug.log');
     
         foreach ($this->dataFields as $key => $value) {
             $fields[] = $key;
