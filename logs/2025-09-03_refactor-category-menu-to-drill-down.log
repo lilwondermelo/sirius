@@ -1,0 +1,6 @@
+Refactored the category menu to implement a drill-down navigation model.
+- Initially, only top-level categories are displayed.
+- Clicking on a category now hides all other branches and shows only the selected category, its direct ancestors (path to the root), and its direct children.
+- This replaces the previous, more complex accordion logic that led to several bugs.
+- The `ready.js` script was updated to load the entire category tree into the DOM initially, hiding the nested subcategories.
+- The main click handler in `event-listener.js` was completely rewritten to support the new, simplified drill-down view by calculating the set of visible elements on each click.

@@ -7,23 +7,45 @@ $(document).ready(function () {
 function loadMenu() {
     getTypes().then(categories => {
         const menuContainer = $('#main_menu');
-        // Удаляем только динамически добавленные категории
         menuContainer.find('.dynamic-category').remove();
-
         const addButton = menuContainer.find('.add-new-type-card');
 
-        categories.forEach(category => {
+        // --- Tree building and flattening ---
+        const categoryMap = new Map(categories.map(c => [c.id, {...c, children: []}]));
+        const tree = [];
+        categories.forEach(c => {
+            if (c.parent_id == 0) {
+                tree.push(categoryMap.get(c.id));
+            } else if (categoryMap.has(c.parent_id)) {
+                categoryMap.get(c.parent_id).children.push(categoryMap.get(c.id));
+            }
+        });
+
+        const flatOrderedList = [];
+        function flatten(node, level) {
+            flatOrderedList.push({...node, level: level});
+            node.children.forEach(child => flatten(child, level + 1));
+        }
+        tree.forEach(rootNode => flatten(rootNode, 0));
+        // --- End of tree logic ---
+
+        let allCatsHTML = '';
+        flatOrderedList.forEach(category => {
             const imgId = ((category.id - 1) % 2) + 1;
-            const menuItemHTML = `
-                <div class="menu_item dynamic-category" cat-id="${category.id}">
+            const isSubcategory = category.parent_id != 0;
+            const hidden = isSubcategory ? 'style="display: none;"' : '';
+            const subcategoryClass = isSubcategory ? 'subcategory-item' : '';
+            const marginLeft = 15 * category.level;
+
+            allCatsHTML += `
+                <div class="menu_item dynamic-category ${subcategoryClass}" cat-id="${category.id}" data-type-parent-id="${category.parent_id}" ${hidden}>
                     <div class="menu_item_img"><img src="media/images/menu/${imgId}.png" alt="${category.name}"></div>
-                    <div class="menu_item_name">${category.name}</div>
+                    <div class="menu_item_name" style="margin-left: ${marginLeft}px;">${category.name}</div>
                     <div class="menu_item_edit_icon" data-type-id="${category.id}" data-type-name="${category.name}" data-type-parent-id="${category.parent_id}">✏️</div>
                 </div>
             `;
-            // Вставляем перед кнопкой "Добавить"
-            addButton.before(menuItemHTML);
         });
+        addButton.before(allCatsHTML);
 
     }).catch(err => {
         console.error("Ошибка при загрузке категорий меню:", err);

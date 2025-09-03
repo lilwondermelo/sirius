@@ -46,10 +46,52 @@ $(document).on('click', '.flex_row_item_name', function() {
     renderItemEdit(item);
 });
 
-$(document).on('click', '.menu_item', function() {
-    let category = $(this).attr('cat-id');
-    currentCategory = category;
-    loadData(category);
+$(document).on('click', '.menu_item:not(.add-new-type-card)', function() {
+    const clickedItem = $(this);
+    const catId = clickedItem.attr('cat-id');
+
+    if (catId == '0') {
+        // Show all top-level items, hide all sub-items
+        $('.dynamic-category:not(.subcategory-item)').show();
+        $('.subcategory-item').hide();
+        loadData(0);
+        return;
+    }
+
+    // 1. & 2. Create a list of IDs to show
+    const visibleIds = [];
+
+    // 3. Add the clicked item
+    visibleIds.push(catId);
+
+    // 4. Add all ancestors
+    let parentId = clickedItem.attr('data-type-parent-id');
+    while (parentId && parseInt(parentId) != 0) {
+        visibleIds.push(parentId);
+        const parent = $('.menu_item[cat-id="' + parentId + '"]');
+        if (parent.length) {
+            parentId = parent.attr('data-type-parent-id');
+        } else {
+            parentId = null; // stop if parent not found
+        }
+    }
+
+    // 5. Add all direct children
+    $('.subcategory-item[data-type-parent-id="' + catId + '"]').each(function() {
+        visibleIds.push($(this).attr('cat-id'));
+    });
+
+    // 6. Hide ALL dynamic items
+    $('.dynamic-category').hide();
+
+    // 7. Show the items from the list
+    visibleIds.forEach(id => {
+        $('.menu_item[cat-id="' + id + '"]').show();
+    });
+
+    // Load data for the clicked category
+    currentCategory = catId;
+    loadData(catId);
 });
 
 $(document).on('click', '.flex_row_item_button_order', function() {
