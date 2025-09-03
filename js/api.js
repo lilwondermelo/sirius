@@ -40,13 +40,13 @@ function uploadData(selectedImageFile, selectedImageId) {
     console.log(ajax_smart_data);
     smartAjaxCall(ajax_smart_data)
     .then(res => {
-        alert("Сохранено!");
+        alert("Сохранено успешно (v2)!");
         console.log(res);
         // можешь сбросить буфер, если нужно:
         selectedImageFile = null;
         selectedImageId = null;
     })
-    .catch(err => alert("Ошибка: " + err));
+    .catch(err => console.log(err));
 }
 
 

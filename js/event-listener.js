@@ -63,7 +63,13 @@ $(document).on('click', '.item_img', function () {
     const id = $(this).closest('.item').attr('item-id');
     selectedImageId = id;
 
-    $('#item_img_input').off('change').on('change', function () {
+    const $fileInput = $('#item_img_input');
+
+    if ($fileInput.length === 0) {
+        return;
+    }
+
+    $fileInput.off('change').on('change', function () {
         const file = this.files[0];
         const id = $(this).data('item-id') || $('.item_img').closest('.item').attr('item-id'); // подстраховка
     
@@ -85,7 +91,7 @@ $(document).on('click', '.item_img', function () {
         reader.readAsDataURL(file);
     });
     
-    $('#item_img_input').click(); // Запуск выбора
+    $fileInput[0].click(); // Используем нативный клик
 });
 
 

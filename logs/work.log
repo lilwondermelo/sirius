@@ -1,1 +1,8 @@
-Error Code: 1701. Cannot truncate a table referenced in a foreign key constraint (`constructor`.`events_items_prices`, CONSTRAINT `events_items_prices_ibfk_1`)
+<br />
+<b>Fatal error</b>:  Uncaught mysqli_sql_exception: You have an error in your SQL syntax; check the manual that corresponds to your MySQL server version for the right syntax to use near ',&quot;Умные часы 1&quot;)' at line 1 in C:\OSPanel\domains\constructor\server\core\_dataRowUpdater.class.php:105
+Stack trace:
+#0 C:\OSPanel\domains\constructor\server\core\_dataRowUpdater.class.php(105): mysqli-&gt;query()
+#1 C:\OSPanel\domains\constructor\server\app.class.php(145): DataRowUpdater-&gt;insert()
+#2 C:\OSPanel\domains\constructor\server\core\_ajaxListener.class.php(109): App-&gt;editProducts()
+#3 {main}
+  thrown in <b>C:\OSPanel\domains\constructor\server\core\_dataRowUpdater.class.php</b> on line <b>105</b><br />

@@ -1,0 +1,6 @@
+[2025-09-03 04:46:29] editProducts called. Decoded data: null
+[2025-09-03 04:47:31] editProducts called. Raw data parameter: ''
+[2025-09-03 04:51:21] _ajaxListener received POST: {"classFile":"app.class","class":"App","method":"getTypes"}
+[2025-09-03 04:51:21] _ajaxListener received POST: {"classFile":"app.class","class":"App","method":"getData","category":"0"}
+[2025-09-03 04:51:24] _ajaxListener received POST: {"classFile":"app.class","class":"App","method":"editProducts","id":"","name":"Умные часы 1"}
+[2025-09-03 04:51:24] editProducts called. Raw data parameter: ''

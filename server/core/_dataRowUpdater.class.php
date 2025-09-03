@@ -89,8 +89,10 @@ class DataRowUpdater {
         $query = $mysql->sqlQuery();
         $fields = [];
         $values = [];
+
+        error_log("DataFields in insert: " . print_r($this->dataFields, true) . "\n", 3, dirname(__DIR__, 2) . '/logs/debug.log');
     
-        foreach ($dataFields as $key => $value) {
+        foreach ($this->dataFields as $key => $value) {
             $fields[] = $key;
             if (is_string($value)) {
                 $values[] = '"' . $query->real_escape_string($value) . '"';
