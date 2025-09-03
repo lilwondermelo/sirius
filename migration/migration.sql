@@ -53,6 +53,7 @@ INSERT INTO `list_units` (`id`, `name`) VALUES
 CREATE TABLE `list_items` (
   `id` INT AUTO_INCREMENT PRIMARY KEY,
   `name` VARCHAR(255) NOT NULL,
+  `vendor_code` VARCHAR(255) NULL,
   `type_id` INT NOT NULL,
   `unit_id` INT NOT NULL,
   `timestamp` BIGINT,

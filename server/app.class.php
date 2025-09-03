@@ -33,6 +33,17 @@ class App {
         file_get_contents($url); // пуш ушёл!
     }
 
+    public function getUnits() {
+        require_once $this->root . '/server/core/_dataSource.class.php';
+        $query = 'SELECT id, name FROM list_units ORDER BY id';
+        $dataSource = new DataSource($query);
+        if (!$responseData = $dataSource->getData()) {
+            $this->error = $dataSource->error;
+            return false;
+        }
+        return $responseData;
+    }
+
     public function getTypes() {
         require_once $this->root . '/server/core/_dataSource.class.php';
         $query = 'SELECT DISTINCT lt.id, lt.name 
@@ -56,12 +67,12 @@ class App {
         li.id AS id, 
         li.timestamp as timestamp,
         li.name AS name, 
+        li.vendor_code AS vendor_code,
         li.type_id AS type, 
         li.unit_id AS unit_id, 
         eip.id AS price_id, 
         eip.price AS price,
-        lu.name as unit,
-        "В наличии" as amount
+        lu.name as unit
     FROM list_items li
     LEFT JOIN (
         SELECT item_id, MAX(id) AS max_price_id
@@ -118,7 +129,8 @@ class App {
             // Просто перемещаем оригинал
             if (move_uploaded_file($tmpPath, $targetPath)) {
                 return $timestamp;
-            } else {
+            }
+            else {
                 $this->error = "Не удалось сохранить файл";
                 return false;
             }
@@ -128,38 +140,60 @@ class App {
     
 
     public function editProducts($data) {
-        $data = json_decode($data, true); 
+        $data = json_decode($data, true);
         $itemId = $data['id'];
-
-        $timestamp = 0;
-        if (isset($_FILES['image'])) {
-            $timestamp = $this->fileUpload($_FILES['image'], $itemId);
-        }
-        if ($timestamp != 0) {
-            $data['timestamp'] = $timestamp;
-        }
+        $price = $data['price'];
+        unset($data['price']);
 
         require_once $this->root . '/server/core/_dataRowUpdater.class.php';
         $updater = new DataRowUpdater('list_items');
 
         if ($itemId == 0) {
+            // Create new item
             unset($data['id']);
-            $result = $updater->insert($data);
-        }
-        else {
+            $newItemId = $updater->insert($data);
+            if (!$newItemId) {
+                $this->error = $updater->error;
+                return false;
+            }
+            $itemId = $newItemId;
+        } else {
+            // Update existing item
             $updater->setKey('id', $itemId);
             unset($data['id']);
             $updater->setDataFields($data);
-            $result = $updater->update();
+            if (!$updater->update()) {
+                $this->error = $updater->error;
+                return false;
+            }
         }
 
-        if (!$result) {
-            $this->error = $updater->error;
+        // Handle file upload
+        if (isset($_FILES['image'])) {
+            $timestamp = $this->fileUpload($_FILES['image'], $itemId);
+            if ($timestamp) {
+                $timestampUpdater = new DataRowUpdater('list_items');
+                $timestampUpdater->setKey('id', $itemId);
+                $timestampUpdater->setDataFields(['timestamp' => $timestamp]);
+                if (!$timestampUpdater->update()) {
+                    $this->error = $timestampUpdater->error;
+                    return false;
+                }
+            }
+        }
+
+        // Update price in events_items_prices
+        $priceUpdater = new DataRowUpdater('events_items_prices');
+        $priceData = [
+            'item_id' => $itemId,
+            'price' => $price
+        ];
+        if (!$priceUpdater->insert($priceData)) {
+            $this->error = $priceUpdater->error;
             return false;
         }
 
-        return $result;
-
+        return $itemId;
     }
 }
 ?>

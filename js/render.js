@@ -115,20 +115,67 @@ function renderItem(item) {
 }           
 
 function renderItemEdit(item) {
-    $("#main_table").html(
-        '<div class="item" item-id="' + (item ? item.id : 0) + '">' +
-            '<div class="item_img"><img src="media/images/items/' + (item ? item.id : 0) + ((item.timestamp)?('_' + item.timestamp):'') + '.jpg" alt=""></div>' +
-            '<input type="file" id="item_img_input" accept=".jpg" style="display: none;">' + 
-            '<div class="item_field">Название: ' +
-                '<input type="text" class="edit_name" value="' + (item ? item.name : '') + '" data-id="' + (item ? item.id : 0) + '">' +
-            '</div>' +
-            '<input type="hidden" id="edit_type_id" value="' + (item ? item.type : currentCategory) + '">' +
-            '<input type="hidden" id="edit_unit_id" value="' + (item ? item.unit_id : 1) + '">' +
+    const itemId = item ? item.id : 0;
+    const timestamp = item ? (item.timestamp ? '_' + item.timestamp : '') : '';
+    const imageUrl = `media/images/items/${itemId}${timestamp}.jpg`;
 
+    // Загружаем список единиц измерения
+    const unitsPromise = smartAjaxCall({
+        classFile: 'app.class',
+        class: 'App',
+        method: 'getUnits',
+        data: {}
+    });
 
-            '<div class="item_button save_button" data-id="' + (item ? item.id : 0) + '">Сохранить</div>' +
-        '</div>'
-    );
+    unitsPromise.then(units => {
+        const unitsOptions = units.map(unit => 
+            `<option value="${unit.id}" ${item && unit.id == item.unit_id ? 'selected' : ''}>${unit.name}</option>`
+        ).join('');
+
+        const formHtml = `
+            <div class="edit-form-container">
+                <div class="form-row">
+                    <div class="form-group form-group-image">
+                        <label class="form-label">Изображение</label>
+                        <label for="item_img_input" class="item_img edit_img">
+                            <img src="${imageUrl}" alt="Изображение товара">
+                        </label>
+                        <input type="file" id="item_img_input" accept=".jpg,.jpeg,.webp,.png" style="display: none;">
+                    </div>
+                    <div class="form-group-fields">
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label for="edit_name" class="form-label">Название</label>
+                                <input type="text" id="edit_name" class="form-input edit_name" value="${item ? item.name : ''}">
+                            </div>
+                            <div class="form-group">
+                                <label for="edit_vendor_code" class="form-label">Артикул</label>
+                                <input type="text" id="edit_vendor_code" class="form-input edit_vendor_code" value="${item ? (item.vendor_code || '') : ''}">
+                            </div>
+                        </div>
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label for="edit_price" class="form-label">Цена</label>
+                                <input type="number" id="edit_price" class="form-input edit_price" value="${item ? item.price : '0.00'}">
+                            </div>
+                            <div class="form-group">
+                                <label for="edit_unit_id" class="form-label">Единица измерения</label>
+                                <select id="edit_unit_id" class="form-input">${unitsOptions}</select>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="form-actions">
+                    <div class="item_button save_button" data-id="${itemId}">Сохранить</div>
+                </div>
+                <input type="hidden" id="edit_type_id" value="${item ? item.type : currentCategory}">
+            </div>
+        `;
+        $("#main_table").html(formHtml);
+    }).catch(error => {
+        console.error("Ошибка при загрузке единиц измерения:", error);
+        // Можно показать пользователю сообщение об ошибке
+    });
 }
 
 function renderAddButton(item) {

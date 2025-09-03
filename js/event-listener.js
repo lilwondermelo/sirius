@@ -3,10 +3,11 @@ $(document).on('click', '.flex_row_item_button_plus', function() {
     let item_id = button_value.attr('item-id');
     const item = addToCart(item_id, 1);
     renderAddButton(item);
-})
+});
+
 $(document).on('click', '.main_title_cart', function() {
     renderCart();
-})
+});
 
 $(document).on('click', '.cart_remove', function() {
     const item_id = $(this).data('id');
@@ -14,13 +15,11 @@ $(document).on('click', '.cart_remove', function() {
     renderCart();
 });
 
-
 $(document).on('click', '.main_title_logo', function() {
+    selectedImageId = 0;
     let item = null;
     renderItemEdit(item);
 });
-
-
 
 $(document).on('click', '.flex_row_item_button_value', function() {
     const $btn = $(this);
@@ -29,8 +28,7 @@ $(document).on('click', '.flex_row_item_button_value', function() {
         const item = addToCart(item_id, 1);
         renderAddButton(item);
     }
-})
-
+});
 
 $(document).on('click', '.flex_row_item_button_minus', function() {
     const $valueBtn = $(this).siblings('.flex_row_item_button_value');
@@ -40,19 +38,19 @@ $(document).on('click', '.flex_row_item_button_minus', function() {
         removeFromCart(item_id);
     }
     renderAddButton(item);
-})
+});
 
 $(document).on('click', '.flex_row_item_name', function() {
     let item = getItem($(this).attr('item-id'));
     selectedImageId = item.id;
     renderItemEdit(item);
-})
+});
 
 $(document).on('click', '.menu_item', function() {
     let category = $(this).attr('cat-id');
     currentCategory = category;
     loadData(category);
-})
+});
 
 $(document).on('click', '.flex_row_item_button_order', function() {
     sendOrderToTelegram();
@@ -60,44 +58,26 @@ $(document).on('click', '.flex_row_item_button_order', function() {
     renderCart();
 });
 
+$(document).on('change', '#item_img_input', function () {
+    const file = this.files[0];
+    if (!file) return;
 
-$(document).on('click', '.item_img', function () {
-    const id = $(this).closest('.item').attr('item-id');
-    selectedImageId = id;
-
-    const $fileInput = $('#item_img_input');
-
-    if ($fileInput.length === 0) {
+    const allowedTypes = ['image/jpeg', 'image/webp', 'image/png'];
+    if (!allowedTypes.includes(file.type)) {
+        alert("Выберите .jpg, .webp или .png файл");
         return;
     }
 
-    $fileInput.off('change').on('change', function () {
-        const file = this.files[0];
-        const id = $(this).data('item-id') || $('.item_img').closest('.item').attr('item-id'); // подстраховка
-    
-        if (!file) return;
-    
-        const allowedTypes = ['image/jpeg', 'image/webp'];
-        if (!allowedTypes.includes(file.type)) {
-            alert("Выберите .jpg или .webp файл");
-            return;
-        }
-    
-        selectedImageFile = file;
-    
-        // Обновляем превью
-        const reader = new FileReader();
-        reader.onload = function (e) {
-            $(`.item[item-id="${id}"] .item_img img`).attr('src', e.target.result);
-        };
-        reader.readAsDataURL(file);
-    });
-    
-    $fileInput[0].click(); // Используем нативный клик
+    selectedImageFile = file;
+
+    const reader = new FileReader();
+    reader.onload = function (e) {
+        $('.item_img.edit_img img').attr('src', e.target.result);
+    };
+    reader.readAsDataURL(file);
 });
 
-
 $(document).on('click', '.save_button', function () {
-    uploadData()
-    
+    const id = $(this).data('id');
+    uploadData(id);
 });

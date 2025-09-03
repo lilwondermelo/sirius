@@ -26,31 +26,41 @@ function sendOrderToTelegram() {
     });
 }
 
+function uploadData(id) {
+    const data = {
+        id: id,
+        name: $('#edit_name').val(),
+        vendor_code: $('#edit_vendor_code').val(),
+        price: $('#edit_price').val(),
+        unit_id: $('#edit_unit_id').val(),
+        type_id: $('#edit_type_id').val()
+    };
 
-function uploadData() {
     let ajax_smart_data = {
         classFile: 'app.class',
         class: 'App',
         method: 'editProducts',
-        data: { id: selectedImageId, name: $('.edit_name').val(), type_id: $('#edit_type_id').val(), unit_id: $('#edit_unit_id').val() }
-    }
+        data: data
+    };
+
     if (selectedImageFile) {
         ajax_smart_data.files = { image: selectedImageFile };
     }
+
     smartAjaxCall(ajax_smart_data)
-    .then(res => {
-        alert("Сохранено успешно!");
-        console.log(res);
-        selectedImageFile = null;
-        selectedImageId = null;
-    })
-    .catch(err => {
-        console.error(err);
-        alert("Ошибка при сохранении: " + (err.descr || err.error || "Неизвестная ошибка"));
-    });
+        .then(res => {
+            alert("Сохранено успешно!");
+            console.log(res);
+            selectedImageFile = null;
+            selectedImageId = null;
+            // опционально: перезагрузить данные, чтобы увидеть изменения
+            loadData(currentCategory);
+        })
+        .catch(err => {
+            console.error(err);
+            alert("Ошибка при сохранении: " + (err.descr || err.error || "Неизвестная ошибка"));
+        });
 }
-
-
 
 function loadData(category) {
     smartAjaxCall({
