@@ -136,16 +136,23 @@ function uploadType(id, name, parent_id) {
         parent_id: parent_id
     };
 
-    smartAjaxCall({
+    let ajax_smart_data = {
         classFile: 'app.class',
         class: 'App',
         method: 'editType',
         data: data
-    })
+    };
+
+    if (selectedImageFile) {
+        ajax_smart_data.files = { image: selectedImageFile };
+    }
+
+    smartAjaxCall(ajax_smart_data)
     .then(res => {
         alert("Категория сохранена успешно!");
         loadMenu(); // Перезагружаем меню
         loadData(currentCategory); // Перезагружаем товары, если нужно
+        selectedImageFile = null;
     })
     .catch(err => {
         console.error(err);

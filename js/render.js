@@ -192,6 +192,7 @@ function renderTypeEdit(type) {
     const typeId = type ? type.id : 0;
     const typeName = type ? type.name : '';
     const parentId = type ? type.parent_id : 0;
+    const imageUrl = type ? `media/images/menu/${typeId}.png?${new Date().getTime()}` : '';
 
     // Загружаем список всех категорий для выбора родительской
     getTypes().then(types => {
@@ -202,16 +203,25 @@ function renderTypeEdit(type) {
         const formHtml = `
             <div class="edit-form-container">
                 <div class="form-row">
-                    <div class="form-group">
-                        <label for="edit_type_name" class="form-label">Название категории</label>
-                        <input type="text" id="edit_type_name" class="form-input" value="${typeName}">
+                    <div class="form-group form-group-image">
+                        <label class="form-label">Изображение</label>
+                        <label for="type_img_input" class="item_img edit_img">
+                            <img src="${imageUrl}" alt="Изображение категории">
+                        </label>
+                        <input type="file" id="type_img_input" accept=".jpg,.jpeg,.webp,.png" style="display: none;">
                     </div>
-                    <div class="form-group">
-                        <label for="edit_type_parent_id" class="form-label">Родительская категория</label>
-                        <select id="edit_type_parent_id" class="form-input">
-                            <option value="0">-- Нет --</option>
-                            ${typeOptions}
-                        </select>
+                    <div class="form-group-fields">
+                        <div class="form-group">
+                            <label for="edit_type_name" class="form-label">Название категории</label>
+                            <input type="text" id="edit_type_name" class="form-input" value="${typeName}">
+                        </div>
+                        <div class="form-group">
+                            <label for="edit_type_parent_id" class="form-label">Родительская категория</label>
+                            <select id="edit_type_parent_id" class="form-input">
+                                <option value="0">-- Нет --</option>
+                                ${typeOptions}
+                            </select>
+                        </div>
                     </div>
                 </div>
                 <div class="form-actions">

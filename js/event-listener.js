@@ -126,6 +126,25 @@ $(document).on('change', '#item_img_input', function () {
     reader.readAsDataURL(file);
 });
 
+$(document).on('change', '#type_img_input', function () {
+    const file = this.files[0];
+    if (!file) return;
+
+    const allowedTypes = ['image/jpeg', 'image/webp', 'image/png'];
+    if (!allowedTypes.includes(file.type)) {
+        alert("Выберите .jpg, .webp или .png файл");
+        return;
+    }
+
+    selectedImageFile = file;
+
+    const reader = new FileReader();
+    reader.onload = function (e) {
+        $('.item_img.edit_img img').attr('src', e.target.result);
+    };
+    reader.readAsDataURL(file);
+});
+
 $(document).on('click', '.add-new-item-card', function() {
     selectedImageId = 0;
     let item = null;

@@ -69,6 +69,33 @@ class App {
         return $responseData;
     }
 
+    public function typeImageUpload($file, $typeId) {
+        $dir = $this->root . '/media/images/menu/';
+        if (!is_dir($dir)) {
+            mkdir($dir, 0755, true);
+        }
+    
+        // Удаляем старые версии
+        $mask = rtrim($dir, '/') . '/' . $typeId . '.*';
+        $oldFiles = glob($mask);
+        foreach ($oldFiles as $oldFile) {
+            @unlink($oldFile);
+        }
+    
+        $tmpPath = $file['tmp_name'];
+        $ext = pathinfo($file['name'], PATHINFO_EXTENSION);
+        $filename = $typeId . '.' . $ext;
+        $targetPath = rtrim($dir, '/') . '/' . $filename;
+        
+        if (move_uploaded_file($tmpPath, $targetPath)) {
+            return true;
+        }
+        else {
+            $this->error = "Не удалось сохранить файл";
+            return false;
+        }
+    }
+
     public function editType($data) {
         $data = json_decode($data, true);
         $typeId = $data['id'];
@@ -94,6 +121,11 @@ class App {
                 $this->error = $updater->error;
                 return false;
             }
+        }
+
+        // Handle file upload
+        if (isset($_FILES['image'])) {
+            $this->typeImageUpload($_FILES['image'], $typeId);
         }
 
         return $typeId;
