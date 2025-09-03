@@ -15,7 +15,8 @@ DROP TABLE IF EXISTS `list_types`;
 --
 CREATE TABLE `list_types` (
   `id` INT AUTO_INCREMENT PRIMARY KEY,
-  `name` VARCHAR(255) NOT NULL
+  `name` VARCHAR(255) NOT NULL,
+  `parent_id` INT NOT NULL DEFAULT 0
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 --

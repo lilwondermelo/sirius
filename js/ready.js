@@ -1,12 +1,16 @@
+$(document).ready(function () {
+    cart = JSON.parse(localStorage.getItem('cart')) || [];
+    loadMenu(); // Загружаем меню
+    loadData(0);
+});
+
 function loadMenu() {
-    smartAjaxCall({
-        classFile: 'app.class',
-        class: 'App',
-        method: 'getTypes'
-    }).then(categories => {
+    getTypes().then(categories => {
         const menuContainer = $('#main_menu');
         // Удаляем только динамически добавленные категории
         menuContainer.find('.dynamic-category').remove();
+
+        const addButton = menuContainer.find('.add-new-type-card');
 
         categories.forEach(category => {
             const imgId = ((category.id - 1) % 2) + 1;
@@ -14,12 +18,13 @@ function loadMenu() {
                 <div class="menu_item dynamic-category" cat-id="${category.id}">
                     <div class="menu_item_img"><img src="media/images/menu/${imgId}.png" alt="${category.name}"></div>
                     <div class="menu_item_name">${category.name}</div>
-                    <div class="menu_item_edit_icon" data-type-id="${category.id}" data-type-name="${category.name}">✏️</div>
+                    <div class="menu_item_edit_icon" data-type-id="${category.id}" data-type-name="${category.name}" data-type-parent-id="${category.parent_id}">✏️</div>
                 </div>
             `;
-            // Добавляем категории перед кнопкой "Добавить"
-            $('.add-new-type-card').before(menuItemHTML);
+            // Вставляем перед кнопкой "Добавить"
+            addButton.before(menuItemHTML);
         });
+
     }).catch(err => {
         console.error("Ошибка при загрузке категорий меню:", err);
     });

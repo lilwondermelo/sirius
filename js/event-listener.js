@@ -98,12 +98,14 @@ $(document).on('click', '.menu_item_edit_icon', function(e) {
     e.stopPropagation(); // Предотвращаем всплытие события до .menu_item
     const typeId = $(this).data('type-id');
     const typeName = $(this).data('type-name');
-    renderTypeEdit({ id: typeId, name: typeName });
+    const parentId = $(this).data('type-parent-id');
+    renderTypeEdit({ id: typeId, name: typeName, parent_id: parentId });
 });
 
 // Сохранение категории
 $(document).on('click', '.save_type_button', function () {
     const typeId = $(this).data('id');
     const typeName = $('#edit_type_name').val();
-    uploadType(typeId, typeName);
+    const parentId = $('#edit_type_parent_id').val();
+    uploadType(typeId, typeName, parentId);
 });

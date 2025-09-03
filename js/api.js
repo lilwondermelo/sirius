@@ -129,10 +129,11 @@ function getTypes() {
     });
 }
 
-function uploadType(id, name) {
+function uploadType(id, name, parent_id) {
     const data = {
         id: id,
-        name: name
+        name: name,
+        parent_id: parent_id
     };
 
     smartAjaxCall({

@@ -191,21 +191,39 @@ function renderItemEdit(item) {
 function renderTypeEdit(type) {
     const typeId = type ? type.id : 0;
     const typeName = type ? type.name : '';
+    const parentId = type ? type.parent_id : 0;
 
-    const formHtml = `
-        <div class="edit-form-container">
-            <div class="form-row">
-                <div class="form-group">
-                    <label for="edit_type_name" class="form-label">Название категории</label>
-                    <input type="text" id="edit_type_name" class="form-input" value="${typeName}">
+    // Загружаем список всех категорий для выбора родительской
+    getTypes().then(types => {
+        const typeOptions = types.map(t => 
+            `<option value="${t.id}" ${parentId == t.id ? 'selected' : ''}>${t.name}</option>`
+        ).join('');
+
+        const formHtml = `
+            <div class="edit-form-container">
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="edit_type_name" class="form-label">Название категории</label>
+                        <input type="text" id="edit_type_name" class="form-input" value="${typeName}">
+                    </div>
+                    <div class="form-group">
+                        <label for="edit_type_parent_id" class="form-label">Родительская категория</label>
+                        <select id="edit_type_parent_id" class="form-input">
+                            <option value="0">-- Нет --</option>
+                            ${typeOptions}
+                        </select>
+                    </div>
+                </div>
+                <div class="form-actions">
+                    <div class="item_button save_type_button" data-id="${typeId}">Сохранить</div>
                 </div>
             </div>
-            <div class="form-actions">
-                <div class="item_button save_type_button" data-id="${typeId}">Сохранить</div>
-            </div>
-        </div>
-    `;
-    $("#main_table").html(formHtml);
+        `;
+        $("#main_table").html(formHtml);
+    }).catch(error => {
+        console.error("Ошибка при загрузке списка категорий:", error);
+        // Можно показать пользователю сообщение об ошибке
+    });
 }
 
 function renderAddButton(item) {

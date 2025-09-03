@@ -46,7 +46,7 @@ class App {
 
     public function getActiveTypes() {
         require_once $this->root . '/server/core/_dataSource.class.php';
-        $query = 'SELECT DISTINCT lt.id, lt.name 
+        $query = 'SELECT DISTINCT lt.id, lt.name, lt.parent_id 
                   FROM list_types lt
                   INNER JOIN list_items li ON lt.id = li.type_id
                   ORDER BY lt.id';
@@ -60,7 +60,7 @@ class App {
 
     public function getTypes() {
         require_once $this->root . '/server/core/_dataSource.class.php';
-        $query = 'SELECT id, name FROM list_types ORDER BY id';
+        $query = 'SELECT id, name, parent_id FROM list_types ORDER BY id';
         $dataSource = new DataSource($query);
         if (!$responseData = $dataSource->getData()) {
             $this->error = $dataSource->error;
