@@ -1,5 +1,3 @@
-
-
 function sendOrderToTelegram() {
     const name = $('#order_name').val();
     const phone = $('#order_phone').val();
@@ -119,5 +117,37 @@ function smartAjaxCall(options) {
             // Ошибка сети
             reject({ error: `Ошибка сети: ${textStatus}`, details: errorThrown });
         });
+    });
+}
+
+function getTypes() {
+    return smartAjaxCall({
+        classFile: 'app.class',
+        class: 'App',
+        method: 'getTypes',
+        data: {}
+    });
+}
+
+function uploadType(id, name) {
+    const data = {
+        id: id,
+        name: name
+    };
+
+    smartAjaxCall({
+        classFile: 'app.class',
+        class: 'App',
+        method: 'editType',
+        data: data
+    })
+    .then(res => {
+        alert("Категория сохранена успешно!");
+        loadMenu(); // Перезагружаем меню
+        loadData(currentCategory); // Перезагружаем товары, если нужно
+    })
+    .catch(err => {
+        console.error(err);
+        alert("Ошибка при сохранении категории: " + (err.descr || err.error || "Неизвестная ошибка"));
     });
 }

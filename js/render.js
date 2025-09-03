@@ -188,6 +188,26 @@ function renderItemEdit(item) {
     });
 }
 
+function renderTypeEdit(type) {
+    const typeId = type ? type.id : 0;
+    const typeName = type ? type.name : '';
+
+    const formHtml = `
+        <div class="edit-form-container">
+            <div class="form-row">
+                <div class="form-group">
+                    <label for="edit_type_name" class="form-label">Название категории</label>
+                    <input type="text" id="edit_type_name" class="form-input" value="${typeName}">
+                </div>
+            </div>
+            <div class="form-actions">
+                <div class="item_button save_type_button" data-id="${typeId}">Сохранить</div>
+            </div>
+        </div>
+    `;
+    $("#main_table").html(formHtml);
+}
+
 function renderAddButton(item) {
     let button = $('.flex_row_item_button_value[item-id="' + item.id + '"]');
     if (item.amount > 0) {

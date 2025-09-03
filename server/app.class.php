@@ -44,7 +44,7 @@ class App {
         return $responseData;
     }
 
-    public function getTypes() {
+    public function getActiveTypes() {
         require_once $this->root . '/server/core/_dataSource.class.php';
         $query = 'SELECT DISTINCT lt.id, lt.name 
                   FROM list_types lt
@@ -56,6 +56,47 @@ class App {
             return false;
         }
         return $responseData;
+    }
+
+    public function getTypes() {
+        require_once $this->root . '/server/core/_dataSource.class.php';
+        $query = 'SELECT id, name FROM list_types ORDER BY id';
+        $dataSource = new DataSource($query);
+        if (!$responseData = $dataSource->getData()) {
+            $this->error = $dataSource->error;
+            return false;
+        }
+        return $responseData;
+    }
+
+    public function editType($data) {
+        $data = json_decode($data, true);
+        $typeId = $data['id'];
+
+        require_once $this->root . '/server/core/_dataRowUpdater.class.php';
+        $updater = new DataRowUpdater('list_types');
+
+        if ($typeId == 0) {
+            // Create new type
+            unset($data['id']);
+            $newTypeId = $updater->insert($data);
+            if (!$newTypeId) {
+                $this->error = $updater->error;
+                return false;
+            }
+            $typeId = $newTypeId;
+        } else {
+            // Update existing type
+            $updater->setKey('id', $typeId);
+            unset($data['id']);
+            $updater->setDataFields($data);
+            if (!$updater->update()) {
+                $this->error = $updater->error;
+                return false;
+            }
+        }
+
+        return $typeId;
     }
 
     public function getData($jsonData) {

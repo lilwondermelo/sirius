@@ -87,3 +87,23 @@ $(document).on('click', '.save_button', function () {
     const id = $(this).data('id');
     uploadData(id);
 });
+
+// Открытие формы для новой категории
+$(document).on('click', '.add-new-type-card', function() {
+    renderTypeEdit(null);
+});
+
+// Открытие формы для редактирования категории
+$(document).on('click', '.menu_item_edit_icon', function(e) {
+    e.stopPropagation(); // Предотвращаем всплытие события до .menu_item
+    const typeId = $(this).data('type-id');
+    const typeName = $(this).data('type-name');
+    renderTypeEdit({ id: typeId, name: typeName });
+});
+
+// Сохранение категории
+$(document).on('click', '.save_type_button', function () {
+    const typeId = $(this).data('id');
+    const typeName = $('#edit_type_name').val();
+    uploadType(typeId, typeName);
+});
