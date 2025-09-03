@@ -76,6 +76,16 @@ function renderSum() {
 
 function renderData(category) {
     $("#main_table").html("");
+
+    // Add the "Add new item" card first
+    const addNewItemCard = `
+        <div class="flex_row_item add-new-item-card">
+            <div class="add-new-item-icon">+</div>
+            <div class="add-new-item-text">Добавить товар</div>
+        </div>
+    `;
+    $("#main_table").append(addNewItemCard);
+
     items.forEach((item, index) => {
         if (item.type == category) {
             renderCard(item);

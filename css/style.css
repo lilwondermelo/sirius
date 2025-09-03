@@ -49,6 +49,15 @@
 	align-items: center;
 }
 
+.main_title_cart {
+	width: 2vw;
+	height: 2vw;
+	position: absolute;
+	top:2vw;
+	left: auto;
+	right: 2vw;
+}
+
 #main_menu {
 	min-width: 90%;
 	margin: 1vw 0;
@@ -93,15 +102,32 @@
 	height: 4vw;
 }
 
-.main_title_cart {
-	width: 2vw;
-	height: 2vw;
-	position: absolute;
-	top:2vw;
-	left: auto;
-	right: 2vw;
-	
+/* Стили для карточки добавления нового товара */
+.add-new-item-card {
+    justify-content: center;
+    align-items: center;
+    cursor: pointer;
+    border: 2px dashed #ccc;
+    color: #ccc;
+    transition: all 0.3s ease;
 }
+
+.add-new-item-card:hover {
+    background-color: #f9f9f9;
+    border-color: #aaa;
+    color: #aaa;
+}
+
+.add-new-item-icon {
+    font-size: 4vw;
+    line-height: 1;
+}
+
+.add-new-item-text {
+    font-size: 1.2vw;
+    margin-top: 1vw;
+}
+
 
 .main_title_cart,.main_title_cart * {
 	cursor: pointer;
@@ -536,10 +562,7 @@
 	}
 	
 
-	.main_title_cart {
-		width: 5vw;
-		height: 5vw;
-	}
+	
 
 	.flex_row_item_amount, .item_amount {
 		font-size: 3vw;

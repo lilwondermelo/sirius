@@ -77,6 +77,12 @@ $(document).on('change', '#item_img_input', function () {
     reader.readAsDataURL(file);
 });
 
+$(document).on('click', '.add-new-item-card', function() {
+    selectedImageId = 0;
+    let item = null;
+    renderItemEdit(item);
+});
+
 $(document).on('click', '.save_button', function () {
     const id = $(this).data('id');
     uploadData(id);
