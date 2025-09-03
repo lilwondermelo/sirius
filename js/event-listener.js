@@ -44,11 +44,13 @@ $(document).on('click', '.flex_row_item_button_minus', function() {
 
 $(document).on('click', '.flex_row_item_name', function() {
     let item = getItem($(this).attr('item-id'));
+    selectedImageId = item.id;
     renderItemEdit(item);
 })
 
 $(document).on('click', '.menu_item', function() {
     let category = $(this).attr('cat-id');
+    currentCategory = category;
     loadData(category);
 })
 
@@ -96,6 +98,6 @@ $(document).on('click', '.item_img', function () {
 
 
 $(document).on('click', '.save_button', function () {
-    uploadData(selectedImageFile, selectedImageId)
+    uploadData()
     
 });

@@ -1,6 +1,7 @@
 let cart = [];
 let items = [];
 let sum = 0;
+let currentCategory = 0;
 
 let selectedImageFile = null;
 let selectedImageId = null;

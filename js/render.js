@@ -122,6 +122,8 @@ function renderItemEdit(item) {
             '<div class="item_field">Название: ' +
                 '<input type="text" class="edit_name" value="' + (item ? item.name : '') + '" data-id="' + (item ? item.id : 0) + '">' +
             '</div>' +
+            '<input type="hidden" id="edit_type_id" value="' + (item ? item.type : currentCategory) + '">' +
+            '<input type="hidden" id="edit_unit_id" value="' + (item ? item.unit_id : 1) + '">' +
 
 
             '<div class="item_button save_button" data-id="' + (item ? item.id : 0) + '">Сохранить</div>' +

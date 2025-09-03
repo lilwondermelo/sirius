@@ -27,26 +27,27 @@ function sendOrderToTelegram() {
 }
 
 
-function uploadData(selectedImageFile, selectedImageId) {
+function uploadData() {
     let ajax_smart_data = {
         classFile: 'app.class',
         class: 'App',
         method: 'editProducts',
-        data: { id: selectedImageId, name: $('.edit_name').val() }
+        data: { id: selectedImageId, name: $('.edit_name').val(), type_id: $('#edit_type_id').val(), unit_id: $('#edit_unit_id').val() }
     }
-    if (selectedImageFile && selectedImageId) {
+    if (selectedImageFile) {
         ajax_smart_data.files = { image: selectedImageFile };
     }
-    console.log(ajax_smart_data);
     smartAjaxCall(ajax_smart_data)
     .then(res => {
-        alert("Сохранено успешно (v2)!");
+        alert("Сохранено успешно!");
         console.log(res);
-        // можешь сбросить буфер, если нужно:
         selectedImageFile = null;
         selectedImageId = null;
     })
-    .catch(err => console.log(err));
+    .catch(err => {
+        console.error(err);
+        alert("Ошибка при сохранении: " + (err.descr || err.error || "Неизвестная ошибка"));
+    });
 }
 
 

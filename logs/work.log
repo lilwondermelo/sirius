@@ -1,8 +1,8 @@
 <br />
-<b>Fatal error</b>:  Uncaught mysqli_sql_exception: You have an error in your SQL syntax; check the manual that corresponds to your MySQL server version for the right syntax to use near ',&quot;Умные часы 1&quot;)' at line 1 in C:\OSPanel\domains\constructor\server\core\_dataRowUpdater.class.php:105
+<b>Fatal error</b>:  Uncaught mysqli_sql_exception: Column 'id' specified twice in C:\OSPanel\domains\constructor\server\core\_dataRowUpdater.class.php:186
 Stack trace:
-#0 C:\OSPanel\domains\constructor\server\core\_dataRowUpdater.class.php(105): mysqli-&gt;query()
-#1 C:\OSPanel\domains\constructor\server\app.class.php(145): DataRowUpdater-&gt;insert()
+#0 C:\OSPanel\domains\constructor\server\core\_dataRowUpdater.class.php(186): mysqli-&gt;query()
+#1 C:\OSPanel\domains\constructor\server\app.class.php(152): DataRowUpdater-&gt;update()
 #2 C:\OSPanel\domains\constructor\server\core\_ajaxListener.class.php(109): App-&gt;editProducts()
 #3 {main}
-  thrown in <b>C:\OSPanel\domains\constructor\server\core\_dataRowUpdater.class.php</b> on line <b>105</b><br />
+  thrown in <b>C:\OSPanel\domains\constructor\server\core\_dataRowUpdater.class.php</b> on line <b>186</b><br />

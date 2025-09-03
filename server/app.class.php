@@ -57,6 +57,7 @@ class App {
         li.timestamp as timestamp,
         li.name AS name, 
         li.type_id AS type, 
+        li.unit_id AS unit_id, 
         eip.id AS price_id, 
         eip.price AS price,
         lu.name as unit,
@@ -142,9 +143,12 @@ class App {
         $updater = new DataRowUpdater('list_items');
 
         if ($itemId == 0) {
+            unset($data['id']);
             $result = $updater->insert($data);
         }
         else {
+            $updater->setKey('id', $itemId);
+            unset($data['id']);
             $updater->setDataFields($data);
             $result = $updater->update();
         }
