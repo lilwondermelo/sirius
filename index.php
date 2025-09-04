@@ -18,15 +18,17 @@ error_reporting(E_ALL);
 	<body>
 		<div class="app_bgr"></div>
 		<div id="app_container">
-			<div class="main_title_cart"><img src="media/icons/cart.svg" alt=""></div>
-			<div class="flex_row main_menu_row" id="main_menu">
-				<div class="menu_item" cat-id=0>
-					<div class="menu_item_img"><img src="media/images/menu/0.png" alt="">
+			<header>
+				<div class="main_title_cart"><img src="media/icons/cart.svg" alt=""></div>
+				<div class="flex_row main_menu_row" id="main_menu">
+					<div class="menu_item" cat-id=0>
+						<div class="menu_item_img"><img src="media/images/menu/0.png" alt="">
+						</div>
+						<div class="menu_item_name">Сириус</div>
 					</div>
-					<div class="menu_item_name">Сириус</div>
+					<!-- Категории будут загружены сюда динамически -->
 				</div>
-				<!-- Категории будут загружены сюда динамически -->
-			</div>
+			</header>
 			<div class="flex_row main_table_row" id="main_table">
 				
 			</div>

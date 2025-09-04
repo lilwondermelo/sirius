@@ -1,3 +1,6 @@
-<br />
-<b>Warning</b>:  Undefined array key "id" in <b>C:\OSPanel\domains\constructor\server\app.class.php</b> on line <b>143</b><br />
-{"result":"Ok","descr":"","data":46}
+main.js:11 Uncaught TypeError: Cannot read properties of null (reading 'classList')
+    at main.js:11:16
+16
+main.js:6 Uncaught TypeError: Cannot read properties of null (reading 'offsetHeight')
+    at main.js:6:57
+(anonymous)	@	main.js:6
