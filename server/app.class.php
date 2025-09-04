@@ -160,11 +160,14 @@ class App {
         }
         
         $dataSource = new DataSource($query);
-        if (!$responseData = $dataSource->getData()) {
+        $responseData = $dataSource->getData();
+
+        if ($responseData === false) {
             $this->error = $dataSource->error;
             return false;
         }
-        return $responseData;
+
+        return $responseData; // Всегда возвращаем массив, даже если он пустой
     }
 
 
