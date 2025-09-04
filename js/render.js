@@ -206,10 +206,10 @@ function renderItemEdit(item) {
     });
 }
 
-function renderTypeEdit(type) {
+function renderTypeEdit(type, newParentId) {
     const typeId = type ? type.id : 0;
     const typeName = type ? type.name : '';
-    const parentId = type ? type.parent_id : 0;
+    const parentId = type ? type.parent_id : (newParentId || 0);
     const imageUrl = type ? `media/images/menu/${typeId}.png?${new Date().getTime()}` : '';
 
     // Загружаем список всех категорий для выбора родительской

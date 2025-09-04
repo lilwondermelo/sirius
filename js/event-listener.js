@@ -158,7 +158,8 @@ $(document).on('click', '.save_button', function () {
 
 // Открытие формы для новой категории
 $(document).on('click', '.add-new-type-card', function() {
-    renderTypeEdit(null);
+    const parentId = $('.menu_item.current-cat').attr('cat-id');
+    renderTypeEdit(null, parentId);
 });
 
 // Открытие формы для редактирования категории
