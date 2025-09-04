@@ -101,7 +101,7 @@ function renderCard(item) {
     $("#main_table").append(' ' + 
             '<div class="flex_row_item">' +
                 '<div class="flex_row_item_img"><img src="media/images/items/' + item.id + ((item.timestamp)?('_' + item.timestamp):'') + '.jpg" alt=""></div>' + 
-                '<div class="flex_row_item_name" item-id="' + item.id + '">' + item.name + '</div>' + 
+                '<div class="flex_row_item_name" item-id="' + item.id + '"><span>' + item.name + '</span></div>' + 
                 '<div class="flex_row_item_amount">' + item.amount + '</div>' + 
                 '<div class="flex_row_item_price">' + item.price + '</div>' + 
                 '<div class="flex_row_item_unit">Цена за 1 ' + item.unit + '</div>' +

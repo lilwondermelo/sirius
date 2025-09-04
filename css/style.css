@@ -251,11 +251,39 @@
 
 .flex_row_item_name {
 	cursor: pointer;
+	height: 3.6em;
+	line-height: 1.2em;
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	text-align: center;
+}
+
+.flex_row_item_name span {
+    display: -webkit-box;
+    -webkit-box-orient: vertical;
+    -webkit-line-clamp: 3;
+    overflow: hidden;
+    text-overflow: ellipsis;
 }
 
 .menu_item_name {
 	width: 100%;
 	margin: 0.5vw 0;
+	height: 2.4em;
+	line-height: 1.2em;
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	text-align: center;
+}
+
+.menu_item_name span {
+    display: -webkit-box;
+    -webkit-box-orient: vertical;
+    -webkit-line-clamp: 2;
+    overflow: hidden;
+    text-overflow: ellipsis;
 }
 
 .flex_col_item_name {

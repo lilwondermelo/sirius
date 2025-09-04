@@ -40,7 +40,7 @@ function loadMenu() {
             allCatsHTML += `
                 <div class="menu_item dynamic-category ${subcategoryClass}" cat-id="${category.id}" data-type-parent-id="${category.parent_id}" ${hidden}>
                     <div class="menu_item_img"><img src="media/images/menu/${imgId}.png" alt="${category.name}"></div>
-                    <div class="menu_item_name">${category.name}</div>
+                    <div class="menu_item_name"><span>${category.name}</span></div>
                     <div class="menu_item_edit_icon" data-type-id="${category.id}" data-type-name="${category.name}" data-type-parent-id="${category.parent_id}">✏️</div>
                 </div>
             `;
