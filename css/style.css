@@ -250,8 +250,12 @@
 }
 
 .flex_row_item_name {
-	margin: 0.5vw 0;
 	cursor: pointer;
+}
+
+.menu_item_name {
+	width: 100%;
+	margin: 0.5vw 0;
 }
 
 .flex_col_item_name {
