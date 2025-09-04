@@ -129,17 +129,24 @@ function renderItemEdit(item) {
     const timestamp = item ? (item.timestamp ? '_' + item.timestamp : '') : '';
     const imageUrl = `media/images/items/${itemId}${timestamp}.jpg`;
 
-    // Загружаем список единиц измерения
+    // Загружаем список единиц измерения и категорий параллельно
     const unitsPromise = smartAjaxCall({
         classFile: 'app.class',
         class: 'App',
         method: 'getUnits',
         data: {}
     });
+    const typesPromise = getTypes(); // Эта функция уже есть и возвращает промис
 
-    unitsPromise.then(units => {
+    Promise.all([unitsPromise, typesPromise]).then(([units, types]) => {
+        // Опции для единиц измерения
         const unitsOptions = units.map(unit => 
             `<option value="${unit.id}" ${item && unit.id == item.unit_id ? 'selected' : ''}>${unit.name}</option>`
+        ).join('');
+
+        // Опции для категорий
+        const typeOptions = types.map(t => 
+            `<option value="${t.id}" ${item && t.id == item.type ? 'selected' : (t.id == currentCategory ? 'selected' : '')}>${t.name}</option>`
         ).join('');
 
         const formHtml = `
@@ -173,17 +180,22 @@ function renderItemEdit(item) {
                                 <select id="edit_unit_id" class="form-input">${unitsOptions}</select>
                             </div>
                         </div>
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label for="edit_type_id" class="form-label">Категория</label>
+                                <select id="edit_type_id" class="form-input">${typeOptions}</select>
+                            </div>
+                        </div>
                     </div>
                 </div>
                 <div class="form-actions">
                     <div class="item_button save_button" data-id="${itemId}">Сохранить</div>
                 </div>
-                <input type="hidden" id="edit_type_id" value="${item ? item.type : currentCategory}">
             </div>
         `;
         $("#main_table").html(formHtml);
     }).catch(error => {
-        console.error("Ошибка при загрузке единиц измерения:", error);
+        console.error("Ошибка при загрузке данных для формы:", error);
         // Можно показать пользователю сообщение об ошибке
     });
 }
