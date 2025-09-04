@@ -108,7 +108,7 @@ function renderCard(item) {
             '<div class="flex_row_item">' +
                 '<div class="flex_row_item_img"><img src="media/images/items/' + item.id + ((item.timestamp)?('_' + item.timestamp):'') + '.jpg" alt=""></div>' + 
                 '<div class="flex_row_item_name" item-id="' + item.id + '"><span>' + item.name + '</span></div>' + 
-                '<div class="flex_row_item_amount">' + item.amount + '</div>' + 
+                '<div class="flex_row_item_amount">' + item.vendor_code + '</div>' + 
                 '<div class="flex_row_item_price">' + item.price + '</div>' + 
                 '<div class="flex_row_item_unit">Цена за 1 ' + item.unit + '</div>' +
                 '<div class="flex_row_item_button">' + 
@@ -124,7 +124,7 @@ function renderItem(item) {
     '<div class="item" item-id="' + item.id + ((item.timestamp)?('_' + item.timestamp):'') + '">' +
         '<div class="item_img"><img src="media/images/items/' + item.id + '.jpg" alt=""></div>' + 
         '<div class="item_name" item-id="' + item.id + '">' + item.name + '</div>' + 
-        '<div class="item_amount">' + item.amount + '</div>' + 
+        '<div class="item_amount">' + item.vendor_code + '</div>' + 
         '<div class="item_price">' + item.price + '</div>' + 
         '<div class="item_button">В корзину</div>' +
     '</div>');

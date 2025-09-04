@@ -1,5 +1,17 @@
+var selectedImageFile = null;
+var selectedImageId = null;
+
 $(document).ready(function () {
     cart = JSON.parse(localStorage.getItem('cart')) || [];
+
+    // Добавляем кнопку добавления категории в конец меню
+    $('#main_menu').append(`
+        <div class="menu_item add-new-type-card">
+            <div class="add-new-item-icon">+</div>
+            <div class="add-new-item-text">Добавить категорию</div>
+        </div>
+    `);
+
     loadMenu(); // Загружаем меню
     loadData(0);
 });
@@ -55,18 +67,3 @@ function loadMenu() {
         console.error("Ошибка при загрузке категорий меню:", err);
     });
 }
-
-$(document).ready(function () {
-    cart = JSON.parse(localStorage.getItem('cart')) || [];
-
-    // Добавляем кнопку добавления категории в конец меню
-    $('#main_menu').append(`
-        <div class="menu_item add-new-type-card">
-            <div class="add-new-item-icon">+</div>
-            <div class="add-new-item-text">Добавить категорию</div>
-        </div>
-    `);
-
-    loadMenu(); // Загружаем меню
-    loadData(0);
-});
