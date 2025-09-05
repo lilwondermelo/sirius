@@ -672,3 +672,8 @@ header {
 header.header--hidden {
     transform: translateY(-100%);
 }
+
+textarea.form-input {
+    resize: vertical;
+    height: auto;
+}

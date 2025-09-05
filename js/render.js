@@ -169,8 +169,10 @@ function renderItemEdit(item) {
                         <div class="form-row">
                             <div class="form-group">
                                 <label for="edit_name" class="form-label">Название</label>
-                                <input type="text" id="edit_name" class="form-input edit_name" value="${item ? item.name : ''}">
+                                <textarea id="edit_name" class="form-input edit_name" rows="3">${item ? item.name : ''}</textarea>
                             </div>
+                        </div>
+                        <div class="form-row">
                             <div class="form-group">
                                 <label for="edit_vendor_code" class="form-label">Артикул</label>
                                 <input type="text" id="edit_vendor_code" class="form-input edit_vendor_code" value="${item ? (item.vendor_code || '') : ''}">
