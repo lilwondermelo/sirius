@@ -143,6 +143,9 @@ class App {
         li.vendor_code AS vendor_code,
         li.type_id AS type, 
         li.unit_id AS unit_id, 
+        li.supplier_id AS supplier_id, 
+        li.supplier_code AS supplier_code, 
+        li.supplier_product_name AS supplier_product_name, 
         eip.id AS price_id, 
         eip.price AS price,
         lu.name as unit

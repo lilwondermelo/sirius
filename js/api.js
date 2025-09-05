@@ -31,7 +31,10 @@ function uploadData(id) {
         vendor_code: $('#edit_vendor_code').val(),
         price: $('#edit_price').val(),
         unit_id: $('#edit_unit_id').val(),
-        type_id: $('#edit_type_id').val()
+        type_id: $('#edit_type_id').val(),
+        supplier_id: $('#edit_supplier_id').val(),
+        supplier_code: $('#edit_supplier_code').val(),
+        supplier_product_name: $('#edit_supplier_product_name').val()
     };
 
     let ajax_smart_data = {
@@ -125,6 +128,15 @@ function getTypes() {
         classFile: 'app.class',
         class: 'App',
         method: 'getTypes',
+        data: {}
+    });
+}
+
+function getSuppliers() {
+    return smartAjaxCall({
+        classFile: 'app.class',
+        class: 'App',
+        method: 'getSuppliers',
         data: {}
     });
 }

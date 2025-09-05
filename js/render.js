@@ -135,16 +135,17 @@ function renderItemEdit(item) {
     const timestamp = item ? (item.timestamp ? '_' + item.timestamp : '') : '';
     const imageUrl = `media/images/items/${itemId}${timestamp}.jpg`;
 
-    // Загружаем список единиц измерения и категорий параллельно
+    // Загружаем список единиц измерения, категорий и поставщиков параллельно
     const unitsPromise = smartAjaxCall({
         classFile: 'app.class',
         class: 'App',
         method: 'getUnits',
         data: {}
     });
-    const typesPromise = getTypes(); // Эта функция уже есть и возвращает промис
+    const typesPromise = getTypes();
+    const suppliersPromise = getSuppliers();
 
-    Promise.all([unitsPromise, typesPromise]).then(([units, types]) => {
+    Promise.all([unitsPromise, typesPromise, suppliersPromise]).then(([units, types, suppliers]) => {
         // Опции для единиц измерения
         const unitsOptions = units.map(unit => 
             `<option value="${unit.id}" ${item && unit.id == item.unit_id ? 'selected' : ''}>${unit.name}</option>`
@@ -153,6 +154,11 @@ function renderItemEdit(item) {
         // Опции для категорий
         const typeOptions = types.map(t => 
             `<option value="${t.id}" ${item && t.id == item.type ? 'selected' : (t.id == currentCategory ? 'selected' : '')}>${t.name}</option>`
+        ).join('');
+
+        // Опции для поставщиков
+        const supplierOptions = suppliers.map(s => 
+            `<option value="${s.id}" ${item && s.id == item.supplier_id ? 'selected' : ''}>${s.name}</option>`
         ).join('');
 
         const formHtml = `
@@ -192,6 +198,23 @@ function renderItemEdit(item) {
                             <div class="form-group">
                                 <label for="edit_type_id" class="form-label">Категория</label>
                                 <select id="edit_type_id" class="form-input">${typeOptions}</select>
+                            </div>
+                        </div>
+                        <hr>
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label for="edit_supplier_id" class="form-label">Поставщик</label>
+                                <select id="edit_supplier_id" class="form-input">${supplierOptions}</select>
+                            </div>
+                             <div class="form-group">
+                                <label for="edit_supplier_code" class="form-label">Код поставщика</label>
+                                <input type="text" id="edit_supplier_code" class="form-input" value="${item && item.supplier_code ? item.supplier_code : ''}">
+                            </div>
+                        </div>
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label for="edit_supplier_product_name" class="form-label">Название у поставщика</label>
+                                <textarea id="edit_supplier_product_name" class="form-input edit_name" rows="3">${item && item.supplier_product_name ? item.supplier_product_name : ''}</textarea>
                             </div>
                         </div>
                     </div>
