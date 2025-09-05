@@ -275,5 +275,38 @@ class App {
 
         return $itemId;
     }
+
+    public function createSupplier($jsonData) {
+        $data = json_decode($jsonData, true);
+
+        // Basic validation
+        if (!isset($data['name']) || !isset($data['inn'])) {
+            $this->error = 'Отсутствуют обязательные поля: имя и ИНН.';
+            return false;
+        }
+
+        require_once $this->root . '/server/core/_dataRowUpdater.class.php';
+        $updater = new DataRowUpdater('suppliers');
+
+        $newSupplierId = $updater->insert($data);
+
+        if (!$newSupplierId) {
+            $this->error = $updater->error;
+            return false;
+        }
+
+        return $newSupplierId;
+    }
+
+    public function getSuppliers() {
+        require_once $this->root . '/server/core/_dataSource.class.php';
+        $query = 'SELECT id, name, inn, email FROM suppliers ORDER BY name';
+        $dataSource = new DataSource($query);
+        if (!$responseData = $dataSource->getData()) {
+            $this->error = $dataSource->error;
+            return false;
+        }
+        return $responseData;
+    }
 }
 ?>

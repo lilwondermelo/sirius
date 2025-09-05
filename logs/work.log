@@ -1,6 +1,3 @@
-main.js:11 Uncaught TypeError: Cannot read properties of null (reading 'classList')
-    at main.js:11:16
-16
-main.js:6 Uncaught TypeError: Cannot read properties of null (reading 'offsetHeight')
-    at main.js:6:57
-(anonymous)	@	main.js:6
+supplier.js:60 Failed to parse server response: <br />
+<b>Deprecated</b>:  trim(): Passing null to parameter #1 ($string) of type string is deprecated in <b>C:\OSPanel\domains\constructor\server\core\_ajaxListener.class.php</b> on line <b>21</b><br />
+{"result":"Error","descr":"PHP class does not exists: .php","data":""}

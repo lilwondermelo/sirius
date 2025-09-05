@@ -19,7 +19,10 @@ error_reporting(E_ALL);
 		<div class="app_bgr"></div>
 		<div id="app_container">
 			<header>
-				<div class="main_title_cart"><img src="media/icons/cart.svg" alt=""></div>
+				<div class="header-actions">
+					<div class="main_title_button" id="add_supplier_btn">Поставщики</div>
+					<div class="main_title_cart"><img src="media/icons/cart.png" alt=""></div>
+				</div>
 				<div class="flex_row main_menu_row" id="main_menu">
 					<div class="menu_item" cat-id=0>
 						<div class="menu_item_img"><img src="media/images/menu/0.png" alt="">
@@ -40,5 +43,6 @@ error_reporting(E_ALL);
 			Подсказка
 		</div>
 		<script src="js/ready.js"></script>
+		<script src="js/supplier.js"></script>
 	</body>
 </html>

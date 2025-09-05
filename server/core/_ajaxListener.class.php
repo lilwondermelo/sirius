@@ -143,5 +143,3 @@ switch (true) {
 }
 
 //or die(json_encode(['result' => 'Error', 'descr' => 'Cant require file: ' . $class_file, 'data' => '']));
-
-
