@@ -24,7 +24,19 @@ function renderArrivalForm(arrivalData = null, container = null) {
                         <textarea id="arrival-comment" class="form-input"></textarea>
                     </div>
                 </div>
+
+                <hr>
                 
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="excel-upload-input" class="form-label">Загрузить из Excel:</label>
+                        <input type="file" id="excel-upload-input" class="form-input" accept=".xls,.xlsx">
+                    </div>
+                    <div class="form-group">
+                        <button id="upload-excel-btn" class="btn">Загрузить</button>
+                    </div>
+                </div>
+
                 <h3>Товары</h3>
                 <div id="arrival-items-container" class="suppliers-table">
                     <!-- Product rows will be added here -->
@@ -53,6 +65,8 @@ function renderArrivalForm(arrivalData = null, container = null) {
         targetContainer.off('click', '.remove-arrival-item-btn').on('click', '.remove-arrival-item-btn', function() {
             $(this).closest('.arrival-item-row').remove();
         });
+        targetContainer.off('click', '#upload-excel-btn').on('click', '#upload-excel-btn', () => handleExcelUpload(products, targetContainer));
+
 
         if (isEditMode) {
             // Pre-fill form with arrival data
@@ -74,6 +88,79 @@ function renderArrivalForm(arrivalData = null, container = null) {
     }).catch(error => {
         console.error("Error fetching data for arrival form:", error);
         targetContainer.html('<p>Ошибка загрузки данных для формы. Пожалуйста, попробуйте еще раз.</p>');
+    });
+}
+
+function handleExcelUpload(products, container) {
+    const fileInput = container.find('#excel-upload-input')[0];
+    const supplierId = container.find('#arrival-supplier').val();
+    const file = fileInput.files[0];
+
+    if (!file) {
+        alert('Пожалуйста, выберите файл для загрузки.');
+        return;
+    }
+    if (!supplierId) {
+        alert('Пожалуйста, выберите поставщика.');
+        return;
+    }
+
+    const formData = new FormData();
+    formData.append('excel_file', file);
+    formData.append('supplier_id', supplierId);
+    formData.append('class', 'App');
+    formData.append('method', 'uploadArrivalExcel');
+
+    // Show a loading indicator
+    const uploadBtn = container.find('#upload-excel-btn');
+    uploadBtn.text('Загрузка...').prop('disabled', true);
+
+    $.ajax({
+        url: 'server/core/_ajaxListener.class.php',
+        type: 'POST',
+        data: formData,
+        processData: false,
+        contentType: false,
+        dataType: 'json',
+        success: function(response) {
+            if (response.result === 'Ok' && response.data) {
+                // Clear existing items
+                container.find('#arrival-items-container').empty();
+                
+                let notFoundCount = 0;
+                let notFoundVendorCodes = [];
+
+                response.data.forEach(item => {
+                    if (item.product_id) {
+                        addArrivalItemRow(products, item, container);
+                    } else {
+                        notFoundCount++;
+                        notFoundVendorCodes.push(item.vendor_code);
+                    }
+                });
+
+                if (notFoundCount > 0) {
+                    alert(`Не найдено ${notFoundCount} товаров в базе данных со следующими артикулами:
+${notFoundVendorCodes.join(', ')}
+
+Остальные товары были добавлены в форму.`);
+                } else {
+                    alert('Все товары из файла успешно добавлены в форму.');
+                }
+
+
+            } else {
+                alert('Ошибка при обработке файла: ' + (response.descr || 'Неизвестная ошибка'));
+            }
+        },
+        error: function(jqXHR, textStatus, errorThrown) {
+            console.error("Excel upload error:", textStatus, errorThrown);
+            alert('Произошла ошибка при загрузке файла.');
+        },
+        complete: function() {
+            // Restore button
+            uploadBtn.text('Загрузить').prop('disabled', false);
+        }
     });
 }
 
