@@ -6,32 +6,6 @@ class App {
         $this->root = $_SERVER['DOCUMENT_ROOT'];
     }
 
-    public function sendOrderToTelegram($cart_data, $name, $phone, $email) {
-        $botToken = '7657389817:AAEjFrbfp0Z7Peh0JXEs7m3LUJPJOOvXXNE';
-        $chatId = '8165809889';
-        $cart =  json_decode($cart_data, true);
-        $name = trim($name ?? '—');
-        $phone = trim($phone ?? '—');
-        $email = trim($email ?? '—');
-        // Формируем текст
-        $message = "📦 Новый заказ:\n";
-        foreach ($cart as $item) {
-            $message .= "🛒 {$item['name']} × {$item['amount']}\n";
-        }
-        $message .= "\n👤 Покупатель:\n";
-        $message .= "Имя: $name\n";
-        $message .= "Телефон: $phone\n";
-        $message .= "Email: $email\n";
-        // Кодируем и отправляем
-        $url = "https://api.telegram.org/bot{$botToken}/sendMessage?" .
-            http_build_query([
-                'chat_id' => $chatId,
-                'text' => $message,
-                'parse_mode' => 'Markdown'
-            ]);
-
-        file_get_contents($url); // пуш ушёл!
-    }
 
     public function getUnits() {
         require_once $this->root . '/server/core/_dataSource.class.php';
