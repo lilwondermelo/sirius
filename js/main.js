@@ -21,6 +21,11 @@ function getItem(id) {
     return items.find(item => item.id == id);
 }
 
+function showMainContent() {
+    $('#admin_panel').hide();
+    $('#main_table').show();
+}
+
 function loadMenu() {
     getTypes().then(types => {
         const menu = $('#main_menu');

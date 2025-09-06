@@ -22,8 +22,7 @@ error_reporting(E_ALL);
 		<div id="app_container">
 			<header>
 				<div class="header-actions">
-					<div class="main_title_button admin-feature" id="add_supplier_btn" style="display: none;">Поставщики</div>
-					<div class="main_title_button admin-feature" id="add_arrival_btn" style="display: none;">Новое поступление</div>
+                    <div class="main_title_button admin-feature" id="admin_panel_btn" style="display: none;">Админ Панель</div>
 					<div class="main_title_cart"><img src="media/icons/cart.png" alt=""></div>
                     <div class="main_title_button" id="login_btn">Войти</div>
                     <div class="main_title_button" id="register_btn">Регистрация</div>
@@ -41,6 +40,16 @@ error_reporting(E_ALL);
 			<div class="flex_row main_table_row" id="main_table">
 				
 			</div>
+            <div id="admin_panel" class="admin-panel" style="display: none;">
+                <div class="admin-panel-tabs">
+                    <div class="admin-panel-tab active" data-tab="suppliers">Поставщики</div>
+                    <div class="admin-panel-tab" data-tab="arrivals">Поступления</div>
+                </div>
+                <div class="admin-panel-content">
+                    <div class="admin-panel-tab-content active" data-tab-content="suppliers"></div>
+                    <div class="admin-panel-tab-content" data-tab-content="arrivals"></div>
+                </div>
+            </div>
 		</div>
 		<div class="popup" id="popup">
 			<div class="popup_inner"></div>

@@ -827,3 +827,41 @@ textarea.form-input {
 .clickable-row:hover {
     background-color: #f1f1f1;
 }
+
+/* Admin Panel Styles */
+.admin-panel {
+    width: 90%;
+    margin: 2vw auto;
+    background: white;
+    border-radius: 1vw;
+    box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+    padding: 1vw;
+}
+
+.admin-panel-tabs {
+    display: flex;
+    border-bottom: 2px solid #eee;
+    margin-bottom: 1vw;
+}
+
+.admin-panel-tab {
+    padding: 1vw 1.5vw;
+    cursor: pointer;
+    font-size: 1.2vw;
+    color: #333;
+    border-bottom: 2px solid transparent;
+}
+
+.admin-panel-tab.active {
+    color: #007bff;
+    border-bottom-color: #007bff;
+    font-weight: bold;
+}
+
+.admin-panel-tab-content {
+    display: none;
+}
+
+.admin-panel-tab-content.active {
+    display: block;
+}

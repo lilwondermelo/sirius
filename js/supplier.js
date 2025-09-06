@@ -47,7 +47,8 @@ function renderSuppliersTable(suppliers) {
     return table;
 }
 
-function loadAndRenderSuppliers() {
+function loadAndRenderSuppliers(container) {
+    const listContainer = container || $('#suppliers_list_container');
     smartAjaxCall({
         classFile: 'app.class',
         class: 'App',
@@ -55,22 +56,26 @@ function loadAndRenderSuppliers() {
         data: {}
     })
     .then(suppliers => {
-        $('#suppliers_list_container').html(renderSuppliersTable(suppliers));
+        listContainer.html(renderSuppliersTable(suppliers));
     })
     .catch(error => {
         console.error("Ошибка при загрузке поставщиков:", error);
-        $('#suppliers_list_container').html('<p>Не удалось загрузить список поставщиков.</p>');
+        listContainer.html('<p>Не удалось загрузить список поставщиков.</p>');
     });
 }
 
 function attachSupplierFormSubmitListener() {
-    $('#supplier_form').on('submit', function(e) {
+    // Use a delegated event listener on a static parent
+    $('.admin-panel-tab-content[data-tab-content="suppliers"]').on('submit', '#supplier_form', function(e) {
         e.preventDefault();
 
+        const form = $(this);
+        const listContainer = form.closest('.admin-panel-tab-content').find('#suppliers_list_container');
+
         const formData = {
-            name: $('#supplier_name').val(),
-            inn: $('#supplier_inn').val(),
-            email: $('#supplier_email').val()
+            name: form.find('#supplier_name').val(),
+            inn: form.find('#supplier_inn').val(),
+            email: form.find('#supplier_email').val()
         };
 
         if (!formData.name || !formData.inn) {
@@ -86,8 +91,8 @@ function attachSupplierFormSubmitListener() {
         })
         .then(response => {
             alert('Поставщик успешно создан! ID: ' + response);
-            $('#supplier_form')[0].reset(); // Clear the form
-            loadAndRenderSuppliers(); // Refresh the list
+            form[0].reset(); // Clear the form
+            loadAndRenderSuppliers(listContainer); // Refresh the list in the correct container
         })
         .catch(error => {
             console.error("Ошибка при создании поставщика:", error);
@@ -98,11 +103,9 @@ function attachSupplierFormSubmitListener() {
 }
 
 
-$(document).ready(function() {
-    // Open supplier form in the main area
-    $('#add_supplier_btn').on('click', function() {
-        $('#main_table').html(renderSupplierForm());
-        attachSupplierFormSubmitListener();
-        loadAndRenderSuppliers();
-    });
-});
+function showSuppliersTab() {
+    const container = $('.admin-panel-tab-content[data-tab-content="suppliers"]');
+    container.html(renderSupplierForm());
+    attachSupplierFormSubmitListener();
+    loadAndRenderSuppliers(container.find('#suppliers_list_container'));
+}

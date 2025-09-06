@@ -181,20 +181,56 @@ $(document).on('click', '.save_type_button', function () {
     uploadType(typeId, typeName, parentId);
 });
 
-// Открытие формы для нового поступления
-$(document).on('click', '#add_arrival_btn', function() {
-    renderArrivalForm();
-});
-
 // Открытие существующего поступления для просмотра
 $(document).on('click', '.arrival-row', function() {
     const arrivalId = $(this).data('arrival-id');
     if (arrivalId) {
         getArrivalDetails(arrivalId).then(data => {
-            renderArrivalForm(data);
+            const arrivalContainer = $('.admin-panel-tab-content[data-tab-content="arrivals"]');
+            renderArrivalForm(data, arrivalContainer);
         }).catch(err => {
             alert('Не удалось загрузить данные о поступлении.');
             console.error(err);
         });
+    }
+});
+
+// Управление админ-панелью
+$(document).on('click', '#admin_panel_btn', function() {
+    const adminPanel = $('#admin_panel');
+    const mainTable = $('#main_table');
+
+    // Всегда показывать админ-панель и скрывать основной контент
+    mainTable.hide();
+    adminPanel.show();
+
+    // Загрузить контент для вкладки "Поставщики" при первом открытии
+    const suppliersTabContent = $('.admin-panel-tab-content[data-tab-content="suppliers"]');
+    if (suppliersTabContent.is(':empty')) {
+        showSuppliersTab();
+    }
+});
+
+// Переключение вкладок в админ-панели
+$(document).on('click', '.admin-panel-tab', function() {
+    const tab = $(this);
+    const tabName = tab.data('tab');
+
+    // Обновление активных вкладок
+    $('.admin-panel-tab').removeClass('active');
+    tab.addClass('active');
+
+    // Показ/скрытие контента вкладок
+    $('.admin-panel-tab-content').removeClass('active');
+    const tabContent = $('.admin-panel-tab-content[data-tab-content="' + tabName + '"]');
+    tabContent.addClass('active');
+
+    // Загрузка контента, если он еще не загружен
+    if (tabContent.is(':empty')) {
+        if (tabName === 'suppliers') {
+            showSuppliersTab();
+        } else if (tabName === 'arrivals') {
+            renderArrivalForm(null, tabContent);
+        }
     }
 });

@@ -1,4 +1,5 @@
 function renderCart() {
+    showMainContent();
     $("#main_table").html("");
 
     if (cart.length > 0) {
@@ -75,6 +76,7 @@ function renderSum() {
 }
 
 function renderData(category) {
+    showMainContent();
     $("#main_table").html("");
 
     // Add the "Add new item" card first for admins
@@ -122,6 +124,7 @@ function renderCard(item) {
 }
 
 function renderItem(item) {
+    showMainContent();
     $("#main_table").html(' ' + 
     '<div class="item" item-id="' + item.id + ((item.timestamp)?('_' + item.timestamp):'') + '">' +
         '<div class="item_img"><img src="media/images/items/' + item.id + '.jpg" alt=""></div>' + 
@@ -133,6 +136,7 @@ function renderItem(item) {
 }           
 
 function renderItemEdit(item) {
+    showMainContent();
     const itemId = item ? item.id : 0;
     const timestamp = item ? (item.timestamp ? '_' + item.timestamp : '') : '';
     const imageUrl = `media/images/items/${itemId}${timestamp}.jpg`;
@@ -234,6 +238,7 @@ function renderItemEdit(item) {
 }
 
 function renderTypeEdit(type, newParentId) {
+    showMainContent();
     const typeId = type ? type.id : 0;
     const typeName = type ? type.name : '';
     const parentId = type ? type.parent_id : (newParentId || 0);

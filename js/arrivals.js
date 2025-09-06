@@ -1,8 +1,8 @@
 
-function renderArrivalForm(arrivalData = null) {
+function renderArrivalForm(arrivalData = null, container = null) {
     const isEditMode = arrivalData !== null;
-    const mainContainer = $('#main_table');
-    mainContainer.empty();
+    const targetContainer = container || $('#main_table');
+    targetContainer.empty();
 
     Promise.all([
         getSuppliers(),
@@ -43,37 +43,42 @@ function renderArrivalForm(arrivalData = null) {
             </div>
         `;
 
-        mainContainer.html(formHtml);
+        targetContainer.html(formHtml);
+        const recentArrivalsContainer = targetContainer.find('#recent-arrivals-list');
 
-        // Attach event listeners for the form
-        $('#add-arrival-item-btn').on('click', () => addArrivalItemRow(products));
-        $('#save-arrival-btn').on('click', () => saveOrUpdateArrival(products));
-        $('#cancel-arrival-btn').on('click', () => renderArrivalForm()); // Re-render the clean form
+        // Use delegated event listeners on the container
+        targetContainer.off('click', '#add-arrival-item-btn').on('click', '#add-arrival-item-btn', () => addArrivalItemRow(products, null, targetContainer));
+        targetContainer.off('click', '#save-arrival-btn').on('click', '#save-arrival-btn', () => saveOrUpdateArrival(products, recentArrivalsContainer));
+        targetContainer.off('click', '#cancel-arrival-btn').on('click', '#cancel-arrival-btn', () => renderArrivalForm(null, targetContainer));
+        targetContainer.off('click', '.remove-arrival-item-btn').on('click', '.remove-arrival-item-btn', function() {
+            $(this).closest('.arrival-item-row').remove();
+        });
 
         if (isEditMode) {
             // Pre-fill form with arrival data
-            $('#arrival-supplier').val(arrivalData.supplier_id);
-            $('#arrival-comment').val(arrivalData.comment);
+            targetContainer.find('#arrival-supplier').val(arrivalData.supplier_id);
+            targetContainer.find('#arrival-comment').val(arrivalData.comment);
 
             // Populate items
             if (arrivalData.items && arrivalData.items.length > 0) {
-                arrivalData.items.forEach(item => addArrivalItemRow(products, item));
+                arrivalData.items.forEach(item => addArrivalItemRow(products, item, targetContainer));
             }
         } else {
             // Add the first empty product row for new arrivals
-            addArrivalItemRow(products);
+            addArrivalItemRow(products, null, targetContainer);
         }
 
         // Load the list of recent arrivals
-        loadAndRenderRecentArrivals();
+        loadAndRenderRecentArrivals(recentArrivalsContainer);
 
     }).catch(error => {
         console.error("Error fetching data for arrival form:", error);
-        mainContainer.html('<p>Ошибка загрузки данных для формы. Пожалуйста, попробуйте еще раз.</p>');
+        targetContainer.html('<p>Ошибка загрузки данных для формы. Пожалуйста, попробуйте еще раз.</p>');
     });
 }
 
-function addArrivalItemRow(products, itemData = null) {
+function addArrivalItemRow(products, itemData = null, container) {
+    const itemsContainer = container.find('#arrival-items-container');
     const productOptions = products.map(p => `<option value="${p.id}">${p.name}</option>`).join('');
     const itemHtml = `
         <div class="arrival-item-row">
@@ -91,8 +96,8 @@ function addArrivalItemRow(products, itemData = null) {
             </div>
         </div>
     `;
-    const newRow = $(itemHtml)
-    $('#arrival-items-container').append(newRow);
+    const newRow = $(itemHtml);
+    itemsContainer.append(newRow);
 
     if (itemData) {
         newRow.find('.arrival-product-select').val(itemData.product_id);
@@ -100,23 +105,20 @@ function addArrivalItemRow(products, itemData = null) {
         newRow.find('.arrival-price').val(itemData.purchase_price);
     }
 
-    // Attach listener to the new remove button
-    newRow.find('.remove-arrival-item-btn').on('click', function() {
-        $(this).closest('.arrival-item-row').remove();
-    });
+    // The remove button listener is now delegated in renderArrivalForm
 }
 
-function saveOrUpdateArrival(products) {
-    const formContainer = $('.arrival-form-container');
+function saveOrUpdateArrival(products, listContainer) {
+    const formContainer = listContainer.closest('.admin-panel-tab-content').find('.arrival-form-container:first');
     const arrivalId = formContainer.data('arrival-id');
 
     const arrivalData = {
-        supplier_id: $('#arrival-supplier').val(),
-        comment: $('#arrival-comment').val(),
+        supplier_id: formContainer.find('#arrival-supplier').val(),
+        comment: formContainer.find('#arrival-comment').val(),
         items: []
     };
 
-    $('.arrival-item-row').each(function() {
+    formContainer.find('.arrival-item-row').each(function() {
         const row = $(this);
         const item = {
             product_id: row.find('.arrival-product-select').val(),
@@ -145,12 +147,13 @@ function saveOrUpdateArrival(products) {
 
     promise.then(response => {
         alert(arrivalId ? "Поступление успешно обновлено!" : "Поступление успешно сохранено!");
-        loadAndRenderRecentArrivals(); // Refresh the list
+        loadAndRenderRecentArrivals(listContainer); // Refresh the list
         if (!arrivalId) {
             // Clear form only on create
-            $('#arrival-comment').val('');
-            $('#arrival-items-container').empty();
-            addArrivalItemRow(products);
+            formContainer.find('#arrival-comment').val('');
+            const itemsContainer = formContainer.find('#arrival-items-container');
+            itemsContainer.empty();
+            addArrivalItemRow(products, null, formContainer);
         }
     }).catch(error => {
         console.error("Error saving arrival:", error);
@@ -158,8 +161,7 @@ function saveOrUpdateArrival(products) {
     });
 }
 
-function loadAndRenderRecentArrivals() {
-    const container = $('#recent-arrivals-list');
+function loadAndRenderRecentArrivals(container) {
     container.html('<p>Загрузка...</p>');
 
     getRecentArrivals().then(arrivals => {
