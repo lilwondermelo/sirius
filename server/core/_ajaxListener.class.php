@@ -38,7 +38,7 @@ if (isset($_GET['action'])) {
             }
             break;
             
-default:
+        default:
             // Fallback to original code if action is not recognized
             executeOriginalLogic();
             break;
@@ -48,40 +48,25 @@ default:
 }
 
 function executeOriginalLogic() {
-    global $app; // Use the global $app object
-
-    $class = filter_input(INPUT_POST, 'class');
-    if (!$class) {
-        $class = filter_input(INPUT_GET, 'class');
-    }
-
-    $method = filter_input(INPUT_POST, 'method');
-    if (!$method) {
-        $method = filter_input(INPUT_GET, 'method');
-    }
-
-    // If the class is App, use the existing $app object
-    if ($class === 'App') {
-        if (method_exists($app, $method)) {
-            $result = $app->$method();
-            if ($result === false) {
-                die(json_encode(['result' => 'Error', 'descr' => $app->error, 'data' => '']));
-            } else {
-                die(json_encode(['result' => 'Ok', 'descr' => '', 'data' => $result], JSON_HEX_TAG | JSON_HEX_APOS | JSON_HEX_QUOT | JSON_HEX_AMP));
-            }
-        } else {
-            die(json_encode(['result' => 'Error', 'descr' => 'Wrong method name ' . $method, 'data' => '']));
-        }
-    }
-
-    // --- Fallback to original logic for other classes ---
+    // All the original code from the file is placed here.
     $class_file = '';
 
     if (isset($_POST['classFile'])) {
-        $class_file = trim(filter_input(INPUT_POST, 'classFile') ?? '');
+        $class_file = trim(filter_input(INPUT_POST, 'classFile'));
     }
     if (!$class_file) {
-        $class_file = trim(filter_input(INPUT_GET, 'classFile') ?? '');
+        $class_file = trim(filter_input(INPUT_GET, 'classFile'));
+    }
+
+    $class = filter_input(INPUT_POST, 'class');
+    $method = filter_input(INPUT_POST, 'method');
+
+
+    if (!$class) {
+        $class = filter_input(INPUT_GET, 'class');
+    }
+    if (!$method) {
+        $method = filter_input(INPUT_GET, 'method');
     }
 
     if (strlen($class_file) == 0) {
@@ -103,15 +88,16 @@ function executeOriginalLogic() {
     if (!$method) {
         die(json_encode(['result' => 'Error', 'descr' => 'Wrong method name ' . $method, 'data' => '']));
     }
-    $class_name = $class; // Keep original class name
+    $class = strtolower(substr($class, 0, 1)) . substr($class, 1, strlen($class) - 1);
+    $class_name = strtoupper(substr($class, 0, 1)) . substr($class, 1, strlen($class) - 1);
 
     require_once '_dataSource.class.php';
     require_once '_dataRowUpdater.class.php';
     require_once $class_file;
-    $obj = new $class_name;
+    $obj = new $class;
 
     if (!method_exists($obj, $method)) {
-        die(json_encode(['result' => 'Error', 'descr' => 'Wrong method ' . $method . ' of class: ' . $class_name, 'data' => '']));
+        die(json_encode(['result' => 'Error', 'descr' => 'Wrong method ' . $method . ' of class: ' . $class, 'data' => '']));
     }
 
     $isprop = false;
@@ -119,6 +105,7 @@ function executeOriginalLogic() {
     foreach ($_GET as $key => $value) {
         if (property_exists($obj, $key)) {
             $obj->$key = $value;
+            //echo $value;
             $isprop = true;
         }
     }
@@ -127,9 +114,11 @@ function executeOriginalLogic() {
         if (property_exists($obj, $key)) {
             $obj->$key = $value;
             $isprop = true;
+            //echo $value;
         }
     }
 
+    //Если переданы файла - принудительно передаем их в свойство $files класса. Если свойства нет - создадим
     if ($_FILES) {
         if (property_exists($obj, 'files')) {
             $obj->files = $_FILES;
@@ -138,6 +127,9 @@ function executeOriginalLogic() {
         }
     }
 
+    //У класса нет нужных свойств, передаем переменные как пареметры метода
+    //ВАЖНО!!! Параметры будут переданы в том порядке, что пришли в POST! Имена роли не играют
+    //Если метод принимает больше параметров, чем пришло, то параметры метода сразу должны быть инициализированы со значениями в классе!
     if (!$isprop) {
         $params = [];
         foreach ($_GET as $key => $value) {
@@ -165,6 +157,7 @@ function executeOriginalLogic() {
             die(json_encode(['result' => 'Ok', 'descr' => $obj->error, 'data' => '']));
             break;
             case $result === FALSE:
+            // --- Логирование ошибки в файл проекта ---
             $log_dir = dirname(__DIR__, 2) . '/logs';
             if (!is_dir($log_dir)) {
                 mkdir($log_dir, 0755, true);
@@ -178,6 +171,7 @@ function executeOriginalLogic() {
                 $log_message .= " The method returned FALSE without a specific error message.\n";
             }
             error_log($log_message, 3, $log_file);
+            // --- Конец логирования ---
             die(json_encode(['result' => 'Error', 'descr' => $obj->error, 'data' => '']));
             break;
         default:
@@ -185,6 +179,5 @@ function executeOriginalLogic() {
             break;
     }
 }
-
 
 //or die(json_encode(['result' => 'Error', 'descr' => 'Cant require file: ' . $class_file, 'data' => '']));
