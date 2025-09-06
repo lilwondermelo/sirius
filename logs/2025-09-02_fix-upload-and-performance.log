@@ -1,8 +1,0 @@
-- Refactored the `renderData` function to significantly improve initial page load performance by building an HTML string buffer instead of appending to the DOM in a loop.
-- Resolved a bug where the image upload dialog would not appear.
-- Fixed a series of cascading AJAX issues:
-    - Removed a duplicate, buggy `smartAjaxCall` function from `api.js`.
-    - Standardized AJAX call parameters to use `className` instead of `class`.
-    - Corrected a server-side logic error in `getData` to ensure all items are loaded when category is 0.
-    - Fixed a JSON parsing error during file uploads by adding `ob_clean()` to the AJAX listener to prevent PHP warnings from corrupting the response.
-- Added a `showError` toast notification function for better user feedback on errors.

@@ -1,3 +1,0 @@
-Removed the dynamic `margin-left` from the `.menu_item_name` element, which was being added as an inline style in `js/ready.js`.
-Added a CSS rule to `css/style.css` to set `width: 100%` for `.menu_item_name`.
-Removed a conflicting margin from `.flex_row_item_name` in `css/style.css`.
