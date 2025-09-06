@@ -143,6 +143,17 @@
     margin-top: 1vw;
 }
 
+.add-new-icon-placeholder {
+    font-size: 3vw;
+    line-height: 4vw; /* Should match the height of menu_item_img */
+    color: #ccc;
+    font-weight: bold;
+}
+
+.add-new-type-card:hover .add-new-icon-placeholder {
+    color: #aaa;
+}
+
 
 .main_title_cart,.main_title_cart * {
 	cursor: pointer;

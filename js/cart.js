@@ -1,3 +1,16 @@
+// Initialize cart from localStorage or as an empty array
+let cart = [];
+
+function loadCart() {
+    const storedCart = localStorage.getItem('cart');
+    if (storedCart) {
+        cart = JSON.parse(storedCart);
+    }
+}
+
+// Load the cart as soon as the script is loaded
+loadCart();
+
 function clearCart() {
     cart = [];
     saveCart();
@@ -23,8 +36,7 @@ function addToCart(item_id, delta) {
     let in_cart = inCart(item_id);
     if (in_cart) {
         in_cart.amount += delta;
-    }
-    else {
+    } else {
         in_cart = getItem(item_id);
         in_cart.amount = delta;
         cart.push(in_cart);
@@ -41,4 +53,3 @@ function getSum() {
         });
     }
 }
-

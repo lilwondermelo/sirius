@@ -77,14 +77,16 @@ function renderSum() {
 function renderData(category) {
     $("#main_table").html("");
 
-    // Add the "Add new item" card first
-    const addNewItemCard = `
-        <div class="flex_row_item add-new-item-card">
-            <div class="add-new-item-icon">+</div>
-            <div class="add-new-item-text">Добавить товар</div>
-        </div>
-    `;
-    $("#main_table").append(addNewItemCard);
+    // Add the "Add new item" card first for admins
+    if (isUserAdmin) {
+        const addNewItemCard = `
+            <div class="flex_row_item add-new-item-card">
+                <div class="add-new-item-icon">+</div>
+                <div class="add-new-item-text">Добавить товар</div>
+            </div>
+        `;
+        $("#main_table").append(addNewItemCard);
+    }
 
     const filteredItems = items.filter(item => category == 0 || item.type == category);
 

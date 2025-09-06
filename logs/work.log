@@ -1,3 +1,13 @@
-supplier.js:60 Failed to parse server response: <br />
-<b>Deprecated</b>:  trim(): Passing null to parameter #1 ($string) of type string is deprecated in <b>C:\OSPanel\domains\constructor\server\core\_ajaxListener.class.php</b> on line <b>21</b><br />
-{"result":"Error","descr":"PHP class does not exists: .php","data":""}
+
+CREATE TABLE `product_arrivals` (
+  `id` int NOT NULL AUTO_INCREMENT,
+  `supplier_id` int DEFAULT NULL,
+  `arrival_date` timestamp NULL DEFAULT CURRENT_TIMESTAMP,
+  `comment` text CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci,
+  PRIMARY KEY (`id`),
+  KEY `supplier_id` (`supplier_id`),
+  CONSTRAINT `product_arrivals_ibfk_1` FOREIGN KEY (`supplier_id`) REFERENCES `suppliers` (`id`) ON DELETE SET NULL
+) ENGINE=InnoDB AUTO_INCREMENT=2 DEFAULT CHARSET=utf8mb3 COLLATE=utf8mb3_bin;
+Ответ MySQL: Документация
+
+#1273 - Unknown collation: 'utf8mb4_0900_ai_ci'

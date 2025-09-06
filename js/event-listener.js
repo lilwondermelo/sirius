@@ -41,9 +41,11 @@ $(document).on('click', '.flex_row_item_button_minus', function() {
 });
 
 $(document).on('click', '.flex_row_item_name', function() {
-    let item = getItem($(this).attr('item-id'));
-    selectedImageId = item.id;
-    renderItemEdit(item);
+    if (isUserAdmin) {
+        let item = getItem($(this).attr('item-id'));
+        selectedImageId = item.id;
+        renderItemEdit(item);
+    }
 });
 
 $(document).on('click', '.menu_item:not(.add-new-type-card)', function() {

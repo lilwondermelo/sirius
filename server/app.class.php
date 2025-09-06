@@ -453,5 +453,117 @@ class App {
             $db->sqlClose();
         }
     }
+
+    public function registerUser($login, $password) {
+        if (empty($login) || empty($password)) {
+            $this->error = 'Логин и пароль не могут быть пустыми.';
+            return false;
+        }
+
+        if (strlen($password) < 4) {
+            $this->error = 'Пароль должен быть не менее 4 символов.';
+            return false;
+        }
+
+        require_once $this->root . '/server/core/connector.class.php';
+        $db = new Connector();
+
+        if (!$db->sqlConnect()) {
+            $this->error = 'Ошибка подключения к БД: ' . $db->error;
+            return false;
+        }
+
+        $mysqli = $db->sqlQuery();
+
+        try {
+            // Check if user exists
+            $stmt = $mysqli->prepare("SELECT id FROM users WHERE login = ?");
+            $stmt->bind_param("s", $login);
+            $stmt->execute();
+            $result = $stmt->get_result();
+            if ($result->num_rows > 0) {
+                $this->error = 'Пользователь с таким логином уже существует.';
+                return false;
+            }
+
+            // Insert new user
+            $password_hash = password_hash($password, PASSWORD_DEFAULT);
+            $stmt = $mysqli->prepare("INSERT INTO users (login, password) VALUES (?, ?)");
+            $stmt->bind_param("ss", $login, $password_hash);
+            
+            if ($stmt->execute()) {
+                return true;
+            } else {
+                $this->error = 'Не удалось создать пользователя.';
+                return false;
+            }
+
+        } catch (Exception $e) {
+            $this->error = 'Ошибка запроса: ' . $e->getMessage();
+            return false;
+        } finally {
+            $db->sqlClose();
+        }
+    }
+
+    public function login($login, $password) {
+        require_once $this->root . '/server/core/connector.class.php';
+        $db = new Connector();
+
+        if (!$db->sqlConnect()) {
+            $this->error = 'Ошибка подключения к БД: ' . $db->error;
+            return false;
+        }
+
+        $mysqli = $db->sqlQuery();
+        $user = null;
+
+        try {
+            $stmt = $mysqli->prepare("SELECT * FROM users WHERE login = ?");
+            $stmt->bind_param("s", $login);
+            $stmt->execute();
+            $result = $stmt->get_result();
+            
+            if ($result->num_rows === 0) {
+                $this->error = 'Пользователь не найден';
+                return false;
+            }
+            
+            $user = $result->fetch_assoc();
+
+        } catch (Exception $e) {
+            $this->error = 'Ошибка запроса: ' . $e->getMessage();
+            return false;
+        } finally {
+            $db->sqlClose();
+        }
+
+        if ($user && password_verify($password, $user['password'])) {
+            $_SESSION['user_id'] = $user['id'];
+            $_SESSION['user_login'] = $user['login'];
+            $_SESSION['user_role'] = $user['role'];
+            return true;
+        } else {
+            $this->error = 'Неверный пароль';
+            return false;
+        }
+    }
+
+    public function logout() {
+        session_destroy();
+        return true;
+    }
+
+    public function checkAuth() {
+        if (isset($_SESSION['user_id'])) {
+            return [
+                'loggedIn' => true,
+                'login' => $_SESSION['user_login'],
+                'role' => $_SESSION['user_role']
+            ];
+        } else {
+            return ['loggedIn' => false];
+        }
+    }
 }
 ?>

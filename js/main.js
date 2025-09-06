@@ -27,7 +27,14 @@ function loadMenu() {
         menu.html(''); // Очищаем меню перед отрисовкой
 
         // Добавляем "Все товары"
-        menu.append('<div class="menu_item" cat-id="0">Все товары</div>');
+        const allProductsHtml = `
+            <div class="menu_item" cat-id="0">
+                <div class="menu_item_img"><img src="media/images/menu/0.png" alt="Все товары">
+                </div>
+                <div class="menu_item_name">Все товары</div>
+            </div>
+        `;
+        menu.append(allProductsHtml);
 
         // Создаем карту для быстрого доступа к элементам
         const typeMap = new Map(types.map(t => [t.id, t]));
@@ -52,8 +59,18 @@ function loadMenu() {
             }
         });
 
-        // Добавляем карточку "Добавить категорию"
-        menu.append('<div class="menu_item add-new-type-card">+</div>');
+        // Добавляем карточку "Добавить категорию" для админа
+        if (isUserAdmin) {
+            const addCategoryHtml = `
+                <div class="menu_item add-new-type-card">
+                    <div class="menu_item_img">
+                        <div class="add-new-icon-placeholder">+</div>
+                    </div>
+                    <div class="menu_item_name">Добавить</div>
+                </div>
+            `;
+            menu.append(addCategoryHtml);
+        }
 
     }).catch(error => {
         console.error("Ошибка при загрузке меню:", error);
@@ -63,6 +80,14 @@ function loadMenu() {
 function renderMenuItem(type, container) {
     const imageUrl = `media/images/menu/${type.id}.png?v=${new Date().getTime()}`;
     const hasChildren = type.children && type.children.length > 0;
+
+    const editIconHtml = isUserAdmin ? `
+        <div class="menu_item_edit_icon" 
+             data-type-id="${type.id}" 
+             data-type-name="${type.name}"
+             data-type-parent-id="${type.parent_id || 0}">
+             &#9998;
+        </div>` : '';
 
     const menuItem = $(`
         <div class="menu_item dynamic-category ${type.parent_id != 0 ? 'subcategory-item' : ''}" 
@@ -74,12 +99,7 @@ function renderMenuItem(type, container) {
             <div class="menu_item_name">
                 <span>${type.name}</span>
             </div>
-            <div class="menu_item_edit_icon" 
-                 data-type-id="${type.id}" 
-                 data-type-name="${type.name}"
-                 data-type-parent-id="${type.parent_id || 0}">
-                 &#9998;
-            </div>
+            ${editIconHtml}
         </div>
     `);
 
@@ -89,4 +109,11 @@ function renderMenuItem(type, container) {
     }
 
     container.append(menuItem);
+
+    // Рендерим дочерние элементы рекурсивно
+    if (type.children && type.children.length > 0) {
+        type.children.forEach(child => {
+            renderMenuItem(child, container);
+        });
+    }
 }
