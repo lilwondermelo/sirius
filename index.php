@@ -24,8 +24,7 @@ error_reporting(E_ALL);
 				<div class="header-actions">
                     <div class="main_title_button admin-feature" id="admin_panel_btn" style="display: none;">Админ Панель</div>
 					<div class="main_title_cart"><img src="media/icons/cart.png" alt=""></div>
-                    <div class="main_title_button" id="login_btn">Войти</div>
-                    <div class="main_title_button" id="register_btn">Регистрация</div>
+                    <div class="main_title_button" id="auth_btn">Авторизация</div>
                     <div class="main_title_button" id="logout_btn" style="display: none;">Выйти</div>
 				</div>
 				<div class="flex_row main_menu_row" id="main_menu">
@@ -50,31 +49,35 @@ error_reporting(E_ALL);
                     <div class="admin-panel-tab-content" data-tab-content="arrivals"></div>
                 </div>
             </div>
+            <div id="auth_page" style="display: none;">
+                <div class="admin-panel-tabs">
+                    <div class="admin-panel-tab auth-tab active" data-tab="login">Вход</div>
+                    <div class="admin-panel-tab auth-tab" data-tab="register">Регистрация</div>
+                </div>
+                <div class="admin-panel-content">
+                    <div class="admin-panel-tab-content auth-tab-content active" data-tab-content="login">
+                        <form id="login_form" class="auth-form">
+                            <h2>Вход</h2>
+                            <input type="text" name="login" placeholder="Логин" required>
+                            <input type="password" name="password" placeholder="Пароль" required>
+                            <button type="submit">Войти</button>
+                        </form>
+                    </div>
+                    <div class="admin-panel-tab-content auth-tab-content" data-tab-content="register">
+                        <form id="register_form" class="auth-form">
+                            <h2>Регистрация</h2>
+                            <input type="text" name="login" placeholder="Логин" required>
+                            <input type="password" name="password" placeholder="Пароль" required>
+                            <input type="password" name="password_confirm" placeholder="Подтвердите пароль" required>
+                            <button type="submit">Зарегистрироваться</button>
+                        </form>
+                    </div>
+                </div>
+            </div>
 		</div>
 		<div class="popup" id="popup">
 			<div class="popup_inner"></div>
 		</div>
-        <div class="popup" id="login_popup">
-            <div class="popup_inner">
-                <h2>Вход</h2>
-                <form id="login_form">
-                    <input type="text" name="login" placeholder="Логин" required>
-                    <input type="password" name="password" placeholder="Пароль" required>
-                    <button type="submit">Войти</button>
-                </form>
-            </div>
-        </div>
-        <div class="popup" id="register_popup">
-            <div class="popup_inner">
-                <h2>Регистрация</h2>
-                <form id="register_form">
-                    <input type="text" name="login" placeholder="Логин" required>
-                    <input type="password" name="password" placeholder="Пароль" required>
-                    <input type="password" name="password_confirm" placeholder="Подтвердите пароль" required>
-                    <button type="submit">Зарегистрироваться</button>
-                </form>
-            </div>
-        </div>
 		<div class="tip">
 			Подсказка
 		</div>

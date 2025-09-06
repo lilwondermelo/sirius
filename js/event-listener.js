@@ -234,3 +234,25 @@ $(document).on('click', '.admin-panel-tab', function() {
         }
     }
 });
+
+// --- Auth Page --- //
+
+// Show Auth Page
+$(document).on('click', '#auth_btn', function() {
+    $('#main_table').hide();
+    $('#admin_panel').hide();
+    $('#auth_page').show();
+});
+
+// Switch auth tabs
+$(document).on('click', '#auth_page .admin-panel-tab', function() {
+    const tab = $(this).data('tab');
+
+    // Update active tab
+    $('#auth_page .admin-panel-tab').removeClass('active');
+    $(this).addClass('active');
+
+    // Update active content
+    $('#auth_page .admin-panel-tab-content').removeClass('active');
+    $(`#auth_page .admin-panel-tab-content[data-tab-content="${tab}"]`).addClass('active');
+});

@@ -1,23 +1,6 @@
 let isUserAdmin = false;
 
 $(document).ready(function() {
-    // Show login popup
-    $('#login_btn').on('click', function() {
-        $('#login_popup').show();
-    });
-
-    // Show register popup
-    $('#register_btn').on('click', function() {
-        $('#register_popup').show();
-    });
-
-    // Hide popup on click outside
-    $('.popup').on('click', function(e) {
-        if (e.target === this) {
-            $(this).hide();
-        }
-    });
-
     // Handle login form submission
     $('#login_form').on('submit', function(e) {
         e.preventDefault();
@@ -63,8 +46,8 @@ $(document).ready(function() {
                 const res = JSON.parse(response);
                 if (res.success) {
                     alert('Регистрация прошла успешно! Теперь вы можете войти.');
-                    $('#register_popup').hide();
-                    $('#login_popup').show();
+                    // Switch to the login tab
+                    $('.auth-tab[data-tab="login"]').click();
                 } else {
                     alert('Ошибка регистрации: ' + res.error);
                 }
@@ -95,8 +78,7 @@ $(document).ready(function() {
                 const res = JSON.parse(response);
                 if (res.loggedIn) {
                     isUserAdmin = (res.role === 'admin');
-                    $('#login_btn').hide();
-                    $('#register_btn').hide();
+                    $('#auth_btn').hide(); // Hide the main auth button
                     $('#logout_btn').show();
                     if (isUserAdmin) {
                         $('.admin-feature').show();
@@ -105,8 +87,7 @@ $(document).ready(function() {
                     }
                 } else {
                     isUserAdmin = false;
-                    $('#login_btn').show();
-                    $('#register_btn').show();
+                    $('#auth_btn').show(); // Show the main auth button
                     $('#logout_btn').hide();
                     $('.admin-feature').hide();
                 }

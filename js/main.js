@@ -23,6 +23,7 @@ function getItem(id) {
 
 function showMainContent() {
     $('#admin_panel').hide();
+    $('#auth_page').hide();
     $('#main_table').show();
 }
 
