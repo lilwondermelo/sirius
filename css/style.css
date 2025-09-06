@@ -20,7 +20,29 @@
 	display: flex;
 }
 .popup {
-	display: none;
+	display: none; /* Hidden by default */
+    position: fixed; /* Stay in place */
+    z-index: 2000; /* Sit on top */
+    left: 0;
+    top: 0;
+    width: 100%; /* Full width */
+    height: 100%; /* Full height */
+    overflow: auto; /* Enable scroll if needed */
+    background-color: rgba(0,0,0,0.4); /* Black w/ opacity */
+    justify-content: center;
+    align-items: center;
+}
+
+.popup_inner {
+    background-color: #fefefe;
+    margin: auto;
+    padding: 20px;
+    border: 1px solid #888;
+    width: 80%;
+    max-width: 800px;
+    border-radius: 1vw;
+    max-height: 90vh;
+    overflow-y: auto;
 }
 
 .app_bgr {
@@ -721,5 +743,76 @@ textarea.form-input {
 }
 
 .suppliers-table tr:hover {
+    background-color: #f1f1f1;
+}
+
+/* Arrival Form Styles */
+.arrival-form-container {
+    width: 90%;
+    margin: 2vw auto;
+    padding: 2vw;
+    background: white;
+    border-radius: 1vw;
+    box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+}
+
+.arrival-form-container h2, .arrival-form-container h3 {
+    text-align: center;
+    margin-bottom: 1.5vw;
+}
+
+#arrival-items-container {
+    display: flex;
+    flex-direction: column;
+    gap: 1vw;
+    margin-top: 1vw;
+    border: none; /* Override suppliers-table border */
+}
+
+.arrival-item-row {
+    display: grid;
+    grid-template-columns: 4fr 1fr 1fr auto;
+    gap: 1vw;
+    align-items: center;
+}
+
+.btn {
+    cursor: pointer;
+    padding: 10px 15px;
+    border-radius: 5px;
+    border: none;
+    font-size: 14px;
+    text-align: center;
+}
+
+.btn-primary {
+    background-color: #007bff;
+    color: white;
+}
+.btn-primary:hover {
+    background-color: #0056b3;
+}
+
+.btn-secondary {
+    background-color: #6c757d;
+    color: white;
+}
+.btn-secondary:hover {
+    background-color: #5a6268;
+}
+
+.btn-danger {
+    background-color: #dc3545;
+    color: white;
+}
+.btn-danger:hover {
+    background-color: #c82333;
+}
+
+.clickable-row {
+    cursor: pointer;
+}
+
+.clickable-row:hover {
     background-color: #f1f1f1;
 }

@@ -141,6 +141,51 @@ function getSuppliers() {
     });
 }
 
+function getProductsList() {
+    return smartAjaxCall({
+        classFile: 'app.class',
+        class: 'App',
+        method: 'getProductsList',
+        data: {}
+    });
+}
+
+function createProductArrival(data) {
+    return smartAjaxCall({
+        classFile: 'app.class',
+        class: 'App',
+        method: 'createProductArrival',
+        data: data 
+    });
+}
+
+function getRecentArrivals() {
+    return smartAjaxCall({
+        classFile: 'app.class',
+        class: 'App',
+        method: 'getRecentArrivals',
+        data: {}
+    });
+}
+
+function getArrivalDetails(arrivalId) {
+    return smartAjaxCall({
+        classFile: 'app.class',
+        class: 'App',
+        method: 'getArrivalDetails',
+        data: { arrivalId: arrivalId }
+    });
+}
+
+function updateProductArrival(data) {
+    return smartAjaxCall({
+        classFile: 'app.class',
+        class: 'App',
+        method: 'updateProductArrival',
+        data: data
+    });
+}
+
 function uploadType(id, name, parent_id) {
     const data = {
         id: id,

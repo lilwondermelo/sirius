@@ -311,5 +311,173 @@ class App {
         }
         return $responseData;
     }
+
+    public function getProductsList() {
+        require_once $this->root . '/server/core/_dataSource.class.php';
+        $query = 'SELECT id, name FROM list_items ORDER BY name';
+        $dataSource = new DataSource($query);
+        if (!$responseData = $dataSource->getData()) {
+            $this->error = $dataSource->error;
+            return false;
+        }
+        return $responseData;
+    }
+
+    public function createProductArrival($jsonData) {
+        $data = json_decode($jsonData, true);
+
+        if (empty($data['supplier_id']) || empty($data['items'])) {
+            $this->error = 'Отсутствуют обязательные поля: поставщик или товары.';
+            return false;
+        }
+
+        require_once $this->root . '/server/core/connector.class.php';
+        $db = new Connector();
+
+        if (!$db->sqlConnect()) {
+            $this->error = $db->error;
+            return false;
+        }
+
+        $mysqli = $db->sqlQuery();
+
+        try {
+            $mysqli->begin_transaction();
+
+            // 1. Insert into product_arrivals
+            $arrivalData = [
+                'supplier_id' => $data['supplier_id'],
+                'comment' => $data['comment'] ?? null
+            ];
+            
+            $stmt = $mysqli->prepare("INSERT INTO product_arrivals (supplier_id, comment) VALUES (?, ?)");
+            $stmt->bind_param("is", $arrivalData['supplier_id'], $arrivalData['comment']);
+            $stmt->execute();
+            $arrivalId = $mysqli->insert_id;
+
+            // 2. Insert into product_arrival_items
+            $itemStmt = $mysqli->prepare(
+                "INSERT INTO product_arrival_items (arrival_id, product_id, quantity, purchase_price) 
+                 VALUES (?, ?, ?, ?)"
+            );
+
+            foreach ($data['items'] as $item) {
+                $itemStmt->bind_param("iidd", $arrivalId, $item['product_id'], $item['quantity'], $item['purchase_price']);
+                $itemStmt->execute();
+            }
+
+            $mysqli->commit();
+            return $arrivalId;
+
+        } catch (Exception $e) {
+            $mysqli->rollback();
+            $this->error = 'Ошибка транзакции: ' . $e->getMessage();
+            return false;
+        } finally {
+            $db->sqlClose();
+        }
+    }
+
+    public function getRecentArrivals() {
+        require_once $this->root . '/server/core/_dataSource.class.php';
+        $query = 'SELECT 
+                    pa.id, 
+                    pa.arrival_date, 
+                    pa.comment, 
+                    s.name AS supplier_name,
+                    COUNT(pai.id) AS item_count,
+                    SUM(pai.quantity * pai.purchase_price) AS total_sum
+                  FROM product_arrivals pa
+                  LEFT JOIN suppliers s ON pa.supplier_id = s.id
+                  LEFT JOIN product_arrival_items pai ON pa.id = pai.arrival_id
+                  GROUP BY pa.id
+                  ORDER BY pa.arrival_date DESC
+                  LIMIT 20';
+        $dataSource = new DataSource($query);
+        if (!$responseData = $dataSource->getData()) {
+            $this->error = $dataSource->error;
+            return false;
+        }
+        return $responseData;
+    }
+
+    public function getArrivalDetails($jsonData) {
+        $data = json_decode($jsonData, true);
+        $arrivalId = $data['arrivalId'];
+
+        require_once $this->root . '/server/core/_dataSource.class.php';
+
+        // Get main arrival data
+        $arrivalQuery = new DataSource(sprintf("SELECT * FROM product_arrivals WHERE id = %d", $arrivalId));
+        $arrivalData = $arrivalQuery->getData();
+        if (!$arrivalData) {
+            $this->error = 'Поступление не найдено.';
+            return false;
+        }
+
+        // Get arrival items
+        $itemsQuery = new DataSource(sprintf("SELECT * FROM product_arrival_items WHERE arrival_id = %d", $arrivalId));
+        $itemsData = $itemsQuery->getData();
+
+        $result = $arrivalData[0];
+        $result['items'] = $itemsData ? $itemsData : [];
+
+        return $result;
+    }
+
+    public function updateProductArrival($jsonData) {
+        $data = json_decode($jsonData, true);
+
+        $arrivalId = $data['arrival_id'] ?? 0;
+
+        if (empty($arrivalId) || empty($data['supplier_id']) || empty($data['items'])) {
+            $this->error = 'Отсутствуют обязательные поля: ID поступления, поставщик или товары.';
+            return false;
+        }
+
+        require_once $this->root . '/server/core/connector.class.php';
+        $db = new Connector();
+
+        if (!$db->sqlConnect()) {
+            $this->error = $db->error;
+            return false;
+        }
+
+        $mysqli = $db->sqlQuery();
+
+        try {
+            $mysqli->begin_transaction();
+
+            // 1. Update product_arrivals table
+            $stmt = $mysqli->prepare("UPDATE product_arrivals SET supplier_id = ?, comment = ? WHERE id = ?");
+            $stmt->bind_param("isi", $data['supplier_id'], $data['comment'], $arrivalId);
+            $stmt->execute();
+
+            // 2. Delete old items
+            $deleteStmt = $mysqli->prepare("DELETE FROM product_arrival_items WHERE arrival_id = ?");
+            $deleteStmt->bind_param("i", $arrivalId);
+            $deleteStmt->execute();
+
+            // 3. Insert new items
+            $itemStmt = $mysqli->prepare(
+                "INSERT INTO product_arrival_items (arrival_id, product_id, quantity, purchase_price) 
+                 VALUES (?, ?, ?, ?)"
+            );
+            foreach ($data['items'] as $item) {
+                $itemStmt->bind_param("iidd", $arrivalId, $item['product_id'], $item['quantity'], $item['purchase_price']);
+                $itemStmt->execute();
+            }
+
+            $mysqli->commit();
+            return true;
+
+        } catch (Exception $e) {
+            $mysqli->rollback();
+            $this->error = 'Ошибка транзакции при обновлении: ' . $e->getMessage();
+            return false;
+        } finally {
+            $db->sqlClose();
+        }
+    }
 }
 ?>

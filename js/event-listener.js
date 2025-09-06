@@ -178,3 +178,21 @@ $(document).on('click', '.save_type_button', function () {
     const parentId = $('#edit_type_parent_id').val();
     uploadType(typeId, typeName, parentId);
 });
+
+// Открытие формы для нового поступления
+$(document).on('click', '#add_arrival_btn', function() {
+    renderArrivalForm();
+});
+
+// Открытие существующего поступления для просмотра
+$(document).on('click', '.arrival-row', function() {
+    const arrivalId = $(this).data('arrival-id');
+    if (arrivalId) {
+        getArrivalDetails(arrivalId).then(data => {
+            renderArrivalForm(data);
+        }).catch(err => {
+            alert('Не удалось загрузить данные о поступлении.');
+            console.error(err);
+        });
+    }
+});
