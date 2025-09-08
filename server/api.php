@@ -79,43 +79,42 @@ try {
 }
 
 /**
- * Обрабатывает POST-запросы: принимает JSON с товарами, добавляет артикулы, сохраняет в БД.
+ * Обрабатывает POST-запросы: принимает JSON от поставщика, сопоставляет SKU, создает новые товары.
  */
 function handlePostRequest() {
     // 1. Получаем и декодируем JSON из тела запроса
     $json_data = file_get_contents('php://input');
     if (empty($json_data)) {
-        http_response_code(400); // Bad Request
+        http_response_code(400);
         echo json_encode(['success' => false, 'message' => 'No data received.']);
         return;
     }
 
-    $data = json_decode($json_data, true); // true для получения ассоциативного массива
+    $data = json_decode($json_data, true);
 
     if (json_last_error() !== JSON_ERROR_NONE) {
-        http_response_code(400); // Bad Request
+        http_response_code(400);
         echo json_encode(['success' => false, 'message' => 'Invalid JSON format: ' . json_last_error_msg()]);
         return;
     }
 
-    // НОРМАЛИЗАЦИЯ: Проверяем, пришел один объект или массив объектов
-    $products = [];
-    if (empty($data)) {
-        // Пустой запрос, делать нечего
-    } elseif (isset($data[0]) && is_array($data[0])) {
-        // Это уже массив объектов, все в порядке
-        $products = $data;
-    } else {
-        // Это один объект, заворачиваем его в массив для универсальной обработки
-        $products[] = $data;
-    }
+    // 2. Валидация входящих данных по новой структуре
+    $supplier_tin = $data['supplierTin'] ?? null;
+    $skus = $data['skus'] ?? null;
 
-    if (empty($products)) {
-        echo json_encode(['success' => true, 'data' => [], 'message' => 'Received empty product list.']);
+    if (empty($supplier_tin) || !is_string($supplier_tin)) {
+        http_response_code(400);
+        echo json_encode(['success' => false, 'message' => 'Missing or invalid supplierTin.']);
         return;
     }
 
-    // 2. Подключаемся к БД
+    if (!is_array($skus)) { // Разрешаем пустой массив SKU
+        http_response_code(400);
+        echo json_encode(['success' => false, 'message' => 'Missing or invalid skus array.']);
+        return;
+    }
+
+    // 3. Подключаемся к БД
     $db = new Connector();
     $mysqli = $db->sqlQuery();
     if (!$mysqli) {
@@ -124,59 +123,83 @@ function handlePostRequest() {
 
     $mysqli->begin_transaction();
 
-    $updated_products = [];
+    $processed_skus = [];
     $errors = [];
 
-    // 3. Обрабатываем каждый товар
-    foreach ($products as $product) {
-        // Проверяем, что $product действительно является массивом
-        if (!is_array($product)) {
-            $errors[] = "An item in the list is not a valid product object.";
-            continue;
-        }
+    // Готовим запросы заранее
+    // !!! ВАЖНО: Адаптируйте `supplier_tin` под имя вашей колонки для ИНН поставщика
+    $select_query = "SELECT vendor_code FROM list_items WHERE supplier_code = ? AND supplier_tin = ?";
+    $stmt_select = $mysqli->prepare($select_query);
 
-        // Генерируем уникальный внутренний артикул
-        $vendor_code = 'ART-' . uniqid();
-        $product['vendor_code'] = $vendor_code;
+    // !!! ВАЖНО: Адаптируйте имена колонок под вашу структуру таблицы
+    $insert_query = "INSERT INTO list_items (vendor_code, supplier_code, supplier_tin) VALUES (?, ?, ?)";
+    $stmt_insert = $mysqli->prepare($insert_query);
 
-        // Предполагаем, что в $product есть ключи, соответствующие полям таблицы list_items
-        // Например: name, price, supplier_code и т.д.
-        // Важно: нужно обеспечить безопасность данных перед вставкой!
-        $name = $product['name'] ?? 'Без имени';
-        $price = $product['price'] ?? 0.0;
-        $supplier_code = $product['supplier_code'] ?? null;
-        
-        // Пример запроса на вставку. Адаптируйте под вашу структуру таблицы!
-        $query = "INSERT INTO list_items (vendor_code, name, price, supplier_code) VALUES (?, ?, ?, ?)";
-        
-        $stmt = $mysqli->prepare($query);
-        if (!$stmt) {
-            $errors[] = "Query preparation failed for product: " . ($name) . ". Error: " . $mysqli->error;
-            continue; // Пропускаем этот товар, но продолжаем с другими
-        }
-
-        $stmt->bind_param('ssds', $vendor_code, $name, $price, $supplier_code);
-        
-        if ($stmt->execute()) {
-            // Товар успешно добавлен, добавляем его в массив для ответа
-            $updated_products[] = $product;
-        } else {
-            // Ошибка при выполнении
-            $errors[] = "Failed to insert product: " . ($name) . ". Error: " . $stmt->error;
-        }
-        $stmt->close();
+    if (!$stmt_select || !$stmt_insert) {
+        throw new Exception('Query preparation failed: ' . $mysqli->error);
     }
 
-    // 4. Завершаем транзакцию
+    // 4. Обрабатываем каждый SKU
+    foreach ($skus as $sku) {
+        if (!is_string($sku) || empty(trim($sku))) {
+            $errors[] = "Invalid SKU value found in list: not a string or empty.";
+            continue;
+        }
+        $clean_sku = trim($sku);
+
+        // a. Проверяем, существует ли уже такой SKU у этого поставщика
+        $stmt_select->bind_param('ss', $clean_sku, $supplier_tin);
+        $stmt_select->execute();
+        $result = $stmt_select->get_result();
+
+        if ($existing_item = $result->fetch_assoc()) {
+            // SKU уже существует, просто добавляем его в результат
+            $processed_skus[] = [
+                'supplier_sku' => $clean_sku,
+                'vendor_code' => $existing_item['vendor_code'],
+                'status' => 'exists'
+            ];
+        } else {
+            // b. SKU не найден, создаем новый
+            $vendor_code = 'ART-' . uniqid();
+            
+            $stmt_insert->bind_param('sss', $vendor_code, $clean_sku, $supplier_tin);
+            
+            if ($stmt_insert->execute()) {
+                // Успешно создано
+                $processed_skus[] = [
+                    'supplier_sku' => $clean_sku,
+                    'vendor_code' => $vendor_code,
+                    'status' => 'created'
+                ];
+            } else {
+                // Ошибка при вставке
+                $errors[] = "Failed to insert SKU: {$clean_sku}. Error: " . $stmt_insert->error;
+            }
+        }
+    }
+    
+    $stmt_select->close();
+    $stmt_insert->close();
+
+    // 5. Завершаем транзакцию
     if (empty($errors)) {
         $mysqli->commit();
-        // Все успешно, отправляем обновленный список товаров
-        echo json_encode(['success' => true, 'data' => $updated_products]);
+        echo json_encode([
+            'success' => true,
+            'data' => [
+                'supplierTin' => $supplier_tin,
+                'processedSkus' => $processed_skus
+            ]
+        ]);
     } else {
         $mysqli->rollback();
-        http_response_code(500); // Internal Server Error
-        // Отправляем отчет об ошибках
-        echo json_encode(['success' => false, 'message' => 'Some products could not be processed.', 'errors' => $errors, 'processed_count' => count($updated_products)]);
+        http_response_code(500);
+        echo json_encode([
+            'success' => false, 
+            'message' => 'Some SKUs could not be processed.', 
+            'errors' => $errors
+        ]);
     }
 
     $db->sqlClose();
