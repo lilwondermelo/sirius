@@ -151,7 +151,7 @@ function handlePostRequest() {
     $matched_skus = [];
 
     // Готовим запрос заранее
-    $select_query = "SELECT vendor_code FROM list_items WHERE supplier_code = ? AND supplier_id = ?";
+    $select_query = "SELECT vendor_code FROM list_items WHERE supplier_code = ?";
     $stmt_select = $mysqli->prepare($select_query);
 
     if (!$stmt_select) {
