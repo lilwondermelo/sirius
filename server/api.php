@@ -79,7 +79,7 @@ try {
 }
 
 /**
- * Обрабатывает POST-запросы: принимает JSON от поставщика, сопоставляет SKU, создает новые товары.
+ * Обрабатывает POST-запросы: принимает JSON от поставщика, сопоставляет SKU и возвращает найденные.
  */
 function handlePostRequest() {
     // 1. Получаем и декодируем JSON из тела запроса
@@ -98,7 +98,7 @@ function handlePostRequest() {
         return;
     }
 
-    // 2. Валидация входящих данных по новой структуре
+    // 2. Валидация входящих данных
     $supplier_tin = $data['supplierTin'] ?? null;
     $skus = $data['skus'] ?? null;
 
@@ -108,7 +108,7 @@ function handlePostRequest() {
         return;
     }
 
-    if (!is_array($skus)) { // Разрешаем пустой массив SKU
+    if (!is_array($skus)) {
         http_response_code(400);
         echo json_encode(['success' => false, 'message' => 'Missing or invalid skus array.']);
         return;
@@ -136,49 +136,32 @@ function handlePostRequest() {
     $stmt_get_supplier->close();
 
     if (!$supplier_id) {
-        http_response_code(400);
-        echo json_encode(['success' => false, 'message' => 'Supplier with TIN ' . htmlspecialchars($supplier_tin) . ' not found.']);
+        // Если поставщик не найден, просто возвращаем пустой результат
+        echo json_encode([
+            'success' => true,
+            'data' => [
+                'supplierTin' => $supplier_tin,
+                'matchedSkus' => []
+            ]
+        ]);
         $db->sqlClose();
         return;
     }
 
-    // Получаем ID типа по умолчанию
-    $default_type_id = null;
-    $result_type = $mysqli->query("SELECT id FROM list_types ORDER BY id LIMIT 1");
-    if ($type_row = $result_type->fetch_assoc()) {
-        $default_type_id = $type_row['id'];
-    }
-    
-    if (!$default_type_id) {
-        http_response_code(400);
-        echo json_encode(['success' => false, 'message' => 'No types found in the database. Cannot create items.']);
-        $db->sqlClose();
-        return;
-    }
+    $matched_skus = [];
 
-    $mysqli->begin_transaction();
-
-    $processed_skus = [];
-    $errors = [];
-
-    // Готовим запросы заранее
+    // Готовим запрос заранее
     $select_query = "SELECT vendor_code FROM list_items WHERE supplier_code = ? AND supplier_id = ?";
     $stmt_select = $mysqli->prepare($select_query);
 
-    $insert_query = "INSERT INTO list_items (vendor_code, supplier_code, supplier_id, name, supplier_product_name, type_id) VALUES (?, ?, ?, ?, ?, ?)";
-    $stmt_insert = $mysqli->prepare($insert_query);
-
-    if (!$stmt_select || !$stmt_insert) {
-        $mysqli->rollback();
-        $db->sqlClose();
+    if (!$stmt_select) {
         throw new Exception('Query preparation failed: ' . $mysqli->error);
     }
 
     // 4. Обрабатываем каждый SKU
     foreach ($skus as $sku) {
         if (!is_string($sku) || empty(trim($sku))) {
-            $errors[] = "Invalid SKU value found in list: not a string or empty.";
-            continue;
+            continue; // Игнорируем невалидные SKU
         }
         $clean_sku = trim($sku);
 
@@ -188,58 +171,25 @@ function handlePostRequest() {
         $result = $stmt_select->get_result();
 
         if ($existing_item = $result->fetch_assoc()) {
-            // SKU уже существует, просто добавляем его в результат
-            $processed_skus[] = [
+            // SKU уже существует, добавляем его в результат
+            $matched_skus[] = [
                 'supplier_sku' => $clean_sku,
-                'vendor_code' => $existing_item['vendor_code'],
-                'status' => 'exists'
+                'vendor_code' => $existing_item['vendor_code']
             ];
-        } else {
-            // b. SKU не найден, создаем новый
-            $vendor_code = 'ART-' . uniqid();
-            
-            $stmt_insert->bind_param('ssissi', $vendor_code, $clean_sku, $supplier_id, $clean_sku, $clean_sku, $default_type_id);
-            
-            if ($stmt_insert->execute()) {
-                // Успешно создано
-                $processed_skus[] = [
-                    'supplier_sku' => $clean_sku,
-                    'vendor_code' => $vendor_code,
-                    'status' => 'created'
-                ];
-            } else {
-                // Ошибка при вставке
-                $errors[] = "Failed to insert SKU: {$clean_sku}. Error: " . $stmt_insert->error;
-            }
         }
+        // Если SKU не найден, просто игнорируем его
     }
     
     $stmt_select->close();
-    $stmt_insert->close();
 
-    // 5. Завершаем транзакцию
-    if (empty($errors)) {
-        $mysqli->commit();
-        echo json_encode([
-            'success' => true,
-            'data' => [
-                'supplierTin' => $supplier_tin,
-                'processedSkus' => $processed_skus
-            ]
-        ]);
-    } else {
-        $mysqli->commit(); // Все равно коммитим успешные операции
-        http_response_code(207); // Multi-Status
-        echo json_encode([
-            'success' => false, 
-            'message' => 'Some SKUs could not be processed.', 
-            'data' => [
-                'supplierTin' => $supplier_tin,
-                'processedSkus' => $processed_skus
-            ],
-            'errors' => $errors
-        ]);
-    }
+    // 5. Всегда возвращаем успешный ответ с найденными совпадениями
+    echo json_encode([
+        'success' => true,
+        'data' => [
+            'supplierTin' => $supplier_tin,
+            'matchedSkus' => $matched_skus
+        ]
+    ]);
 
     $db->sqlClose();
 }
