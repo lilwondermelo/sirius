@@ -565,5 +565,91 @@ class App {
             return ['loggedIn' => false];
         }
     }
+
+    public function handleExternalApi($jsonData) {
+        $data = json_decode($jsonData, true);
+
+        if (json_last_error() !== JSON_ERROR_NONE) {
+            $this->error = 'Invalid JSON format: ' . json_last_error_msg();
+            return false;
+        }
+
+        $supplier_tin = $data['supplierTin'] ?? null;
+        $skus = $data['skus'] ?? null;
+
+        if (empty($supplier_tin) || !is_string($supplier_tin)) {
+            $this->error = 'Missing or invalid supplierTin.';
+            return false;
+        }
+
+        if (!is_array($skus)) {
+            $this->error = 'Missing or invalid skus array.';
+            return false;
+        }
+
+        require_once $this->root . '/server/core/connector.class.php';
+        $db = new Connector();
+        $mysqli = $db->sqlQuery();
+        if (!$mysqli) {
+            $this->error = 'Database connection failed: ' . $db->error;
+            return false;
+        }
+
+        $supplier_id = null;
+        $stmt_get_supplier = $mysqli->prepare("SELECT id FROM suppliers WHERE inn = ?");
+        if (!$stmt_get_supplier) {
+            $this->error = 'Failed to prepare supplier lookup query: ' . $mysqli->error;
+            return false;
+        }
+        $stmt_get_supplier->bind_param('s', $supplier_tin);
+        $stmt_get_supplier->execute();
+        $result_supplier = $stmt_get_supplier->get_result();
+        if ($supplier_row = $result_supplier->fetch_assoc()) {
+            $supplier_id = $supplier_row['id'];
+        }
+        $stmt_get_supplier->close();
+
+        if (!$supplier_id) {
+            return [
+                'supplierTin' => $supplier_tin,
+                'matchedSkus' => []
+            ];
+        }
+
+        $matched_skus = [];
+        $select_query = "SELECT vendor_code FROM list_items WHERE supplier_code = ? AND supplier_id = ?";
+        $stmt_select = $mysqli->prepare($select_query);
+
+        if (!$stmt_select) {
+            $this->error = 'Query preparation failed: ' . $mysqli->error;
+            return false;
+        }
+
+        foreach ($skus as $sku) {
+            if (!is_string($sku) || empty(trim($sku))) {
+                continue;
+            }
+            $clean_sku = trim($sku);
+
+            $stmt_select->bind_param('si', $clean_sku, $supplier_id);
+            $stmt_select->execute();
+            $result = $stmt_select->get_result();
+
+            if ($existing_item = $result->fetch_assoc()) {
+                $matched_skus[] = [
+                    'supplier_sku' => $clean_sku,
+                    'vendor_code' => $existing_item['vendor_code']
+                ];
+            }
+        }
+        
+        $stmt_select->close();
+        $db->sqlClose();
+
+        return [
+            'supplierTin' => $supplier_tin,
+            'matchedSkus' => $matched_skus
+        ];
+    }
 }
 ?>
