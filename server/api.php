@@ -90,11 +90,28 @@ function handlePostRequest() {
         return;
     }
 
-    $products = json_decode($json_data, true); // true для получения ассоциативного массива
+    $data = json_decode($json_data, true); // true для получения ассоциативного массива
 
     if (json_last_error() !== JSON_ERROR_NONE) {
         http_response_code(400); // Bad Request
         echo json_encode(['success' => false, 'message' => 'Invalid JSON format: ' . json_last_error_msg()]);
+        return;
+    }
+
+    // НОРМАЛИЗАЦИЯ: Проверяем, пришел один объект или массив объектов
+    $products = [];
+    if (empty($data)) {
+        // Пустой запрос, делать нечего
+    } elseif (isset($data[0]) && is_array($data[0])) {
+        // Это уже массив объектов, все в порядке
+        $products = $data;
+    } else {
+        // Это один объект, заворачиваем его в массив для универсальной обработки
+        $products[] = $data;
+    }
+
+    if (empty($products)) {
+        echo json_encode(['success' => true, 'data' => [], 'message' => 'Received empty product list.']);
         return;
     }
 
@@ -112,6 +129,12 @@ function handlePostRequest() {
 
     // 3. Обрабатываем каждый товар
     foreach ($products as $product) {
+        // Проверяем, что $product действительно является массивом
+        if (!is_array($product)) {
+            $errors[] = "An item in the list is not a valid product object.";
+            continue;
+        }
+
         // Генерируем уникальный внутренний артикул
         $vendor_code = 'ART-' . uniqid();
         $product['vendor_code'] = $vendor_code;
@@ -128,7 +151,7 @@ function handlePostRequest() {
         
         $stmt = $mysqli->prepare($query);
         if (!$stmt) {
-            $errors[] = "Query preparation failed for product: " . ($product['name'] ?? 'N/A') . ". Error: " . $mysqli->error;
+            $errors[] = "Query preparation failed for product: " . ($name) . ". Error: " . $mysqli->error;
             continue; // Пропускаем этот товар, но продолжаем с другими
         }
 
@@ -139,7 +162,7 @@ function handlePostRequest() {
             $updated_products[] = $product;
         } else {
             // Ошибка при выполнении
-            $errors[] = "Failed to insert product: " . ($product['name'] ?? 'N/A') . ". Error: " . $stmt->error;
+            $errors[] = "Failed to insert product: " . ($name) . ". Error: " . $stmt->error;
         }
         $stmt->close();
     }
