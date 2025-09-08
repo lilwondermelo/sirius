@@ -1,0 +1,75 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <title>Тестирование API</title>
+    <script src="js/jquery-3.5.1.min.js"></script>
+    <style>
+        body { font-family: sans-serif; padding: 20px; }
+        textarea { width: 100%; height: 200px; margin-bottom: 10px; }
+        button { padding: 10px 20px; }
+        #response { background-color: #f0f0f0; padding: 10px; white-space: pre-wrap; word-wrap: break-word; margin-top: 20px; }
+    </style>
+</head>
+<body>
+
+    <h1>Тестирование /server/api.php</h1>
+
+    <form id="api-tester-form">
+        <label for="json-input">JSON для отправки:</label>
+        <textarea id="json-input">
+{
+    "supplierTin": "5406148504",
+    "skus": [
+        "61 960",
+        "71 635",
+        "71 627",
+        "NON_EXISTING_SKU"
+    ]
+}</textarea>
+        
+        <button type="submit">Отправить запрос</button>
+    </form>
+
+    <h2>Ответ от сервера:</h2>
+    <pre id="response"></pre>
+
+    <script>
+        $(document).ready(function() {
+            $('#api-tester-form').on('submit', function(e) {
+                e.preventDefault();
+
+                let jsonInput = $('#json-input').val();
+                let requestData;
+
+                try {
+                    requestData = JSON.parse(jsonInput);
+                } catch (error) {
+                    $('#response').text('Ошибка: Невалидный JSON.\n' + error);
+                    return;
+                }
+
+                $('#response').text('Загрузка...');
+
+                $.ajax({
+                    type: 'POST',
+                    url: 'server/api.php',
+                    data: JSON.stringify(requestData),
+                    contentType: 'application/json; charset=utf-8',
+                    dataType: 'json'
+                })
+                .done(function(data) {
+                    $('#response').text(JSON.stringify(data, null, 4));
+                })
+                .fail(function(jqXHR, textStatus, errorThrown) {
+                    let errorMsg = 'Ошибка AJAX: ' + textStatus + '\n';
+                    errorMsg += 'HTTP статус: ' + jqXHR.status + '\n';
+                    errorMsg += 'Ответ сервера: ' + jqXHR.responseText;
+                    $('#response').text(errorMsg);
+                });
+            });
+        });
+    </script>
+
+</body>
+</html>
