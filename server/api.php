@@ -228,11 +228,15 @@ function handlePostRequest() {
             ]
         ]);
     } else {
-        $mysqli->rollback();
-        http_response_code(500);
+        $mysqli->commit(); // Все равно коммитим успешные операции
+        http_response_code(207); // Multi-Status
         echo json_encode([
             'success' => false, 
             'message' => 'Some SKUs could not be processed.', 
+            'data' => [
+                'supplierTin' => $supplier_tin,
+                'processedSkus' => $processed_skus
+            ],
             'errors' => $errors
         ]);
     }
