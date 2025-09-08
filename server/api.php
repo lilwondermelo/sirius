@@ -132,7 +132,7 @@ function handlePostRequest() {
     $stmt_select = $mysqli->prepare($select_query);
 
     // !!! ВАЖНО: Адаптируйте имена колонок под вашу структуру таблицы
-    $insert_query = "INSERT INTO list_items (vendor_code, supplier_code, supplier_tin) VALUES (?, ?, ?)";
+    $insert_query = "INSERT INTO list_items (vendor_code, supplier_code, supplier_tin, name, supplier_product_name, type_id) VALUES (?, ?, ?, ?, ?, 0)";
     $stmt_insert = $mysqli->prepare($insert_query);
 
     if (!$stmt_select || !$stmt_insert) {
@@ -163,7 +163,7 @@ function handlePostRequest() {
             // b. SKU не найден, создаем новый
             $vendor_code = 'ART-' . uniqid();
             
-            $stmt_insert->bind_param('sss', $vendor_code, $clean_sku, $supplier_tin);
+            $stmt_insert->bind_param('sssss', $vendor_code, $clean_sku, $supplier_tin, $clean_sku, $clean_sku);
             
             if ($stmt_insert->execute()) {
                 // Успешно создано
