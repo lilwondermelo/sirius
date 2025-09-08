@@ -142,6 +142,20 @@ function handlePostRequest() {
         return;
     }
 
+    // Получаем ID типа по умолчанию
+    $default_type_id = null;
+    $result_type = $mysqli->query("SELECT id FROM list_types ORDER BY id LIMIT 1");
+    if ($type_row = $result_type->fetch_assoc()) {
+        $default_type_id = $type_row['id'];
+    }
+    
+    if (!$default_type_id) {
+        http_response_code(400);
+        echo json_encode(['success' => false, 'message' => 'No types found in the database. Cannot create items.']);
+        $db->sqlClose();
+        return;
+    }
+
     $mysqli->begin_transaction();
 
     $processed_skus = [];
@@ -151,7 +165,7 @@ function handlePostRequest() {
     $select_query = "SELECT vendor_code FROM list_items WHERE supplier_code = ? AND supplier_id = ?";
     $stmt_select = $mysqli->prepare($select_query);
 
-    $insert_query = "INSERT INTO list_items (vendor_code, supplier_code, supplier_id, name, supplier_product_name, type_id) VALUES (?, ?, ?, ?, ?, 0)";
+    $insert_query = "INSERT INTO list_items (vendor_code, supplier_code, supplier_id, name, supplier_product_name, type_id) VALUES (?, ?, ?, ?, ?, ?)";
     $stmt_insert = $mysqli->prepare($insert_query);
 
     if (!$stmt_select || !$stmt_insert) {
@@ -184,7 +198,7 @@ function handlePostRequest() {
             // b. SKU не найден, создаем новый
             $vendor_code = 'ART-' . uniqid();
             
-            $stmt_insert->bind_param('ssiss', $vendor_code, $clean_sku, $supplier_id, $clean_sku, $clean_sku);
+            $stmt_insert->bind_param('ssissi', $vendor_code, $clean_sku, $supplier_id, $clean_sku, $clean_sku, $default_type_id);
             
             if ($stmt_insert->execute()) {
                 // Успешно создано
