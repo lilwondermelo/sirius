@@ -739,8 +739,8 @@ class App {
 
         $stmt_check = $mysqli->prepare("SELECT id FROM list_items WHERE vendor_code = ?");
         $stmt_insert = $mysqli->prepare(
-            "INSERT INTO list_items (name, vendor_code, supplier_id, supplier_code, supplier_product_name) 
-             VALUES (?, ?, ?, ?, ?)"
+            "INSERT INTO list_items (name, vendor_code, supplier_id, supplier_code, supplier_product_name, type_id, unit_id) 
+             VALUES (?, ?, ?, ?, ?, ?, ?)"
         );
 
         if (!$stmt_check || !$stmt_insert) {
@@ -748,6 +748,9 @@ class App {
             $db->sqlClose();
             return false;
         }
+
+        $default_type_id = 1; // Default category
+        $default_unit_id = 1; // Default unit
 
         foreach ($products as $index => $product) {
             $vendor_code = trim($product['Наш Артикул'] ?? '');
@@ -769,12 +772,14 @@ class App {
             }
 
             $stmt_insert->bind_param(
-                'ssiss', 
+                'ssissii', 
                 $supplier_name, 
                 $vendor_code, 
                 $supplier_id, 
                 $supplier_sku, 
-                $supplier_name
+                $supplier_name,
+                $default_type_id,
+                $default_unit_id
             );
             
             if ($stmt_insert->execute()) {
