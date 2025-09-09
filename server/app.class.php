@@ -684,5 +684,89 @@ class App {
             'matchedSkus' => $matched_skus
         ];
     }
+
+    public function handleExternalApiProductSync($jsonData) {
+        $data = json_decode($jsonData, true);
+        if (json_last_error() !== JSON_ERROR_NONE) {
+            $this->error = 'Invalid JSON format: ' . json_last_error_msg();
+            return false;
+        }
+
+        $supplier_id = $data['supplierId'] ?? null;
+        $newProducts = $data['newProducts'] ?? null;
+
+        if (empty($supplier_id)) {
+            $this->error = 'Missing supplierId.';
+            return false;
+        }
+
+        if (!is_array($newProducts)) {
+            $this->error = 'Missing or invalid newProducts array.';
+            return false;
+        }
+
+        require_once $this->root . '/server/core/connector.class.php';
+        $db = new Connector();
+        $mysqli = $db->sqlQuery();
+        if (!$mysqli) {
+            $this->error = 'Database connection failed: ' . $db->error;
+            return false;
+        }
+
+        $stats = ['created' => 0, 'existed' => 0, 'skipped' => 0, 'errors' => []];
+
+        $stmt_check = $mysqli->prepare("SELECT id FROM list_items WHERE vendor_code = ?");
+        $stmt_insert = $mysqli->prepare(
+            "INSERT INTO list_items (name, vendor_code, supplier_id, supplier_code, supplier_product_name) 
+             VALUES (?, ?, ?, ?, ?)"
+        );
+
+        if (!$stmt_check || !$stmt_insert) {
+            $this->error = 'Failed to prepare statements: ' . $mysqli->error;
+            $db->sqlClose();
+            return false;
+        }
+
+        foreach ($newProducts as $index => $product) {
+            $supplier_sku = trim($product['supplier_sku'] ?? '');
+            $supplier_name = trim($product['supplier_name'] ?? '');
+            $vendor_code = trim($product['vendor_code'] ?? '');
+
+            if (empty($vendor_code)) {
+                $stats['skipped']++;
+                continue; 
+            }
+
+            $stmt_check->bind_param('s', $vendor_code);
+            $stmt_check->execute();
+            $result = $stmt_check->get_result();
+
+            if ($result->num_rows > 0) {
+                $stats['existed']++;
+                continue;
+            }
+
+            $stmt_insert->bind_param(
+                'ssiss', 
+                $supplier_name, 
+                $vendor_code, 
+                $supplier_id, 
+                $supplier_sku, 
+                $supplier_name
+            );
+            
+            if ($stmt_insert->execute()) {
+                $stats['created']++;
+            } else {
+                $stats['errors'][] = "Failed to insert product at index {$index}: " . $stmt_insert->error;
+            }
+        }
+
+        $stmt_check->close();
+        $stmt_insert->close();
+        $db->sqlClose();
+
+        return $stats;
+    }
 }
 ?>
