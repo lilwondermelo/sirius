@@ -97,7 +97,7 @@ $(document).ready(function() {
 
     checkAuthStatus().always(function() {
         // Now that we know the user's role, load the main content
-        loadData(0);
+        loadData(currentCategory);
         loadMenu();
     });
 });

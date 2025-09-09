@@ -90,14 +90,14 @@ function renderData(category) {
         $("#main_table").append(addNewItemCard);
     }
 
-    const filteredItems = items.filter(item => category == 0 || item.type == category);
-
-    if (filteredItems.length === 0) {
-        // No items to display, the "add new" card is already there.
-        // You could add a message here if you want.
-        // $("#main_table").append('<div class="no-items-message">В этой категории пока нет товаров.</div>');
+    if (!items || items.length === 0) {
+        // No items to display, the "add new" card is already there for admins.
+        // You could add a message here if you want for non-admins.
+        if (!isUserAdmin) {
+             $("#main_table").append('<div class="no-items-message">В этой категории пока нет товаров.</div>');
+        }
     } else {
-        filteredItems.forEach((item, index) => {
+        items.forEach((item, index) => {
             renderCard(item);
             renderAddButton(inCart(item.id));
         });

@@ -16,9 +16,7 @@ $(document).on('click', '.cart_remove', function() {
 });
 
 $(document).on('click', '.main_title_logo', function() {
-    selectedImageId = 0;
-    let item = null;
-    renderItemEdit(item);
+    $('.menu_item[cat-id="0"]').click();
 });
 
 $(document).on('click', '.flex_row_item_button_value', function() {

@@ -105,35 +105,63 @@ class App {
         return $typeId;
     }
 
+    private function _getAllChildCategories($categoryId, $db_query) {
+        $children = [];
+        $query = "SELECT id FROM list_types WHERE parent_id = " . $categoryId;
+        $result = $db_query->query($query);
+        if ($result) {
+            while ($row = $result->fetch_assoc()) {
+                $childId = $row['id'];
+                $children[] = $childId;
+                $children = array_merge($children, $this->_getAllChildCategories($childId, $db_query));
+            }
+        }
+        return $children;
+    }
+
     public function getData($jsonData) {
         $data = json_decode($jsonData, true);
         $type_id = (int)($data['category'] ?? 0);
 
         require_once $this->root . '/server/core/_dataSource.class.php';
+        require_once $this->root . '/server/core/connector.class.php';
+
         $query = 'SELECT 
-        li.id AS id, 
-        li.timestamp as timestamp,
-        li.name AS name, 
-        li.vendor_code AS vendor_code,
-        li.type_id AS type, 
-        li.unit_id AS unit_id, 
-        li.supplier_id AS supplier_id, 
-        li.supplier_code AS supplier_code, 
-        li.supplier_product_name AS supplier_product_name, 
-        eip.id AS price_id, 
-        eip.price AS price,
-        lu.name as unit
-    FROM list_items li
-    LEFT JOIN (
-        SELECT item_id, MAX(id) AS max_price_id
-        FROM events_items_prices
-        GROUP BY item_id
-    ) AS latest_price ON li.id = latest_price.item_id
-    LEFT JOIN events_items_prices eip ON eip.id = latest_price.max_price_id 
-    LEFT JOIN list_units lu ON lu.id = li.unit_id';
+            li.id AS id, 
+            li.timestamp as timestamp,
+            li.name AS name, 
+            li.vendor_code AS vendor_code,
+            li.type_id AS type, 
+            li.unit_id AS unit_id, 
+            li.supplier_id AS supplier_id, 
+            li.supplier_code AS supplier_code, 
+            li.supplier_product_name AS supplier_product_name, 
+            eip.id AS price_id, 
+            eip.price AS price,
+            lu.name as unit
+        FROM list_items li
+        LEFT JOIN (
+            SELECT item_id, MAX(id) AS max_price_id
+            FROM events_items_prices
+            GROUP BY item_id
+        ) AS latest_price ON li.id = latest_price.item_id
+        LEFT JOIN events_items_prices eip ON eip.id = latest_price.max_price_id 
+        LEFT JOIN list_units lu ON lu.id = li.unit_id';
 
         if ($type_id != 0) {
-            $query .= ' WHERE li.type_id = ' . $type_id;
+            $db = new Connector();
+            if (!$db->sqlConnect()) {
+                $this->error = $db->error;
+                return false;
+            }
+            $db_query = $db->sqlQuery();
+            
+            $categoryIds = [$type_id];
+            $childCategories = $this->_getAllChildCategories($type_id, $db_query);
+            $categoryIds = array_merge($categoryIds, $childCategories);
+            $db->sqlClose();
+            
+            $query .= ' WHERE li.type_id IN (' . implode(',', $categoryIds) . ')';
         }
         
         $dataSource = new DataSource($query);
@@ -144,7 +172,12 @@ class App {
             return false;
         }
 
-        return $responseData; // Всегда возвращаем массив, даже если он пустой
+        // Bug fix: if response is null, return an empty array
+        if ($responseData === null) {
+            return [];
+        }
+
+        return $responseData;
     }
 
 
