@@ -692,16 +692,16 @@ class App {
             return false;
         }
 
-        $supplier_id = $data['supplierId'] ?? null;
-        $newProducts = $data['newProducts'] ?? null;
+        $supplier_tin = $data['supplierTin'] ?? null;
+        $products = $data['products'] ?? null;
 
-        if (empty($supplier_id)) {
-            $this->error = 'Missing supplierId.';
+        if (empty($supplier_tin)) {
+            $this->error = 'Missing supplierTin.';
             return false;
         }
 
-        if (!is_array($newProducts)) {
-            $this->error = 'Missing or invalid newProducts array.';
+        if (!is_array($products)) {
+            $this->error = 'Missing or invalid products array.';
             return false;
         }
 
@@ -710,6 +710,28 @@ class App {
         $mysqli = $db->sqlQuery();
         if (!$mysqli) {
             $this->error = 'Database connection failed: ' . $db->error;
+            return false;
+        }
+
+        // Get supplier_id from TIN
+        $supplier_id = null;
+        $stmt_get_supplier = $mysqli->prepare("SELECT id FROM suppliers WHERE inn = ?");
+        if (!$stmt_get_supplier) {
+            $this->error = 'Failed to prepare supplier lookup query: ' . $mysqli->error;
+            $db->sqlClose();
+            return false;
+        }
+        $stmt_get_supplier->bind_param('s', $supplier_tin);
+        $stmt_get_supplier->execute();
+        $result_supplier = $stmt_get_supplier->get_result();
+        if ($supplier_row = $result_supplier->fetch_assoc()) {
+            $supplier_id = $supplier_row['id'];
+        }
+        $stmt_get_supplier->close();
+
+        if (!$supplier_id) {
+            $this->error = 'Supplier with TIN ' . $supplier_tin . ' not found.';
+            $db->sqlClose();
             return false;
         }
 
@@ -727,10 +749,10 @@ class App {
             return false;
         }
 
-        foreach ($newProducts as $index => $product) {
-            $supplier_sku = trim($product['supplier_sku'] ?? '');
-            $supplier_name = trim($product['supplier_name'] ?? '');
-            $vendor_code = trim($product['vendor_code'] ?? '');
+        foreach ($products as $index => $product) {
+            $vendor_code = trim($product['Наш Артикул'] ?? '');
+            $supplier_sku = trim($product['Артикул'] ?? '');
+            $supplier_name = trim($product['Наименование товара'] ?? '');
 
             if (empty($vendor_code)) {
                 $stats['skipped']++;
@@ -758,7 +780,7 @@ class App {
             if ($stmt_insert->execute()) {
                 $stats['created']++;
             } else {
-                $stats['errors'][] = "Failed to insert product at index {$index}: " . $stmt_insert->error;
+                $stats['errors'][] = "Failed to insert product at index {$index} ('{$vendor_code}'): " . $stmt_insert->error;
             }
         }
 
