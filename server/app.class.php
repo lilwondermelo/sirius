@@ -608,7 +608,8 @@ class App {
         }
 
         $supplier_tin = $data['supplierTin'] ?? null;
-        $skus = $data['skus'] ?? null;
+        $skus = $data['skus'] ?? [];
+        $names = $data['names'] ?? [];
 
         if (empty($supplier_tin) || !is_string($supplier_tin)) {
             $this->error = 'Missing or invalid supplierTin.';
@@ -616,7 +617,14 @@ class App {
         }
 
         if (!is_array($skus)) {
-            $this->error = 'Missing or invalid skus array.';
+            $skus = []; // Treat non-array as empty
+        }
+        if (!is_array($names)) {
+            $names = []; // Treat non-array as empty
+        }
+
+        if (empty($skus) && empty($names)) {
+            $this->error = 'Both skus and names arrays are empty.';
             return false;
         }
 
@@ -632,6 +640,7 @@ class App {
         $stmt_get_supplier = $mysqli->prepare("SELECT id FROM suppliers WHERE inn = ?");
         if (!$stmt_get_supplier) {
             $this->error = 'Failed to prepare supplier lookup query: ' . $mysqli->error;
+            $db->sqlClose();
             return false;
         }
         $stmt_get_supplier->bind_param('s', $supplier_tin);
@@ -643,45 +652,78 @@ class App {
         $stmt_get_supplier->close();
 
         if (!$supplier_id) {
+            $db->sqlClose();
             return [
                 'supplierTin' => $supplier_tin,
-                'matchedSkus' => []
+                'matchedProducts' => []
             ];
         }
 
-        $matched_skus = [];
-        $select_query = "SELECT vendor_code FROM list_items WHERE supplier_code = ? AND supplier_id = ?";
-        $stmt_select = $mysqli->prepare($select_query);
+        $matched_products = [];
 
-        if (!$stmt_select) {
-            $this->error = 'Query preparation failed: ' . $mysqli->error;
-            return false;
+        // Match by SKU
+        if (!empty($skus)) {
+            $stmt_select_sku = $mysqli->prepare("SELECT vendor_code FROM list_items WHERE supplier_code = ? AND supplier_id = ?");
+            if (!$stmt_select_sku) {
+                $this->error = 'SKU query preparation failed: ' . $mysqli->error;
+                $db->sqlClose();
+                return false;
+            }
+
+            foreach ($skus as $sku) {
+                if (!is_string($sku) || empty(trim($sku))) {
+                    continue;
+                }
+                $clean_sku = trim($sku);
+
+                $stmt_select_sku->bind_param('si', $clean_sku, $supplier_id);
+                $stmt_select_sku->execute();
+                $result = $stmt_select_sku->get_result();
+
+                if ($existing_item = $result->fetch_assoc()) {
+                    $matched_products[] = [
+                        'supplier_sku' => $clean_sku,
+                        'vendor_code' => $existing_item['vendor_code']
+                    ];
+                }
+            }
+            $stmt_select_sku->close();
         }
 
-        foreach ($skus as $sku) {
-            if (!is_string($sku) || empty(trim($sku))) {
-                continue;
+        // Match by Name
+        if (!empty($names)) {
+            $stmt_select_name = $mysqli->prepare("SELECT vendor_code FROM list_items WHERE supplier_product_name = ? AND supplier_id = ?");
+            if (!$stmt_select_name) {
+                $this->error = 'Name query preparation failed: ' . $mysqli->error;
+                $db->sqlClose();
+                return false;
             }
-            $clean_sku = trim($sku);
 
-            $stmt_select->bind_param('si', $clean_sku, $supplier_id);
-            $stmt_select->execute();
-            $result = $stmt_select->get_result();
+            foreach ($names as $name) {
+                if (!is_string($name) || empty(trim($name))) {
+                    continue;
+                }
+                $clean_name = trim($name);
 
-            if ($existing_item = $result->fetch_assoc()) {
-                $matched_skus[] = [
-                    'supplier_sku' => $clean_sku,
-                    'vendor_code' => $existing_item['vendor_code']
-                ];
+                $stmt_select_name->bind_param('si', $clean_name, $supplier_id);
+                $stmt_select_name->execute();
+                $result = $stmt_select_name->get_result();
+
+                if ($existing_item = $result->fetch_assoc()) {
+                    $matched_products[] = [
+                        'supplier_name' => $clean_name,
+                        'vendor_code' => $existing_item['vendor_code']
+                    ];
+                }
             }
+            $stmt_select_name->close();
         }
         
-        $stmt_select->close();
         $db->sqlClose();
 
         return [
             'supplierTin' => $supplier_tin,
-            'matchedSkus' => $matched_skus
+            'matchedProducts' => $matched_products
         ];
     }
 
