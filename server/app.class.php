@@ -847,6 +847,8 @@ class App {
                         if ($this->_insertItemPrice($item_id, (float)$new_price)) {
                             $stats['prices_updated']++;
                         }
+                    } else {
+                        $stats['errors'][] = "Skipping price update for item {$item_id} (vendor_code: {$vendor_code}): new price ({$new_price}) is the same as DB price ({$latest_price}).";
                     }
                 }
                 continue;
