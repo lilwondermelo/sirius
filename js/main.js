@@ -1,4 +1,6 @@
 let currentCategory = 0;
+let selectedImageFile = null;
+let selectedImageId = null;
 
 document.addEventListener("DOMContentLoaded", function() {
     let lastScrollTop = 0;
