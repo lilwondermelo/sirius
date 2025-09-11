@@ -1,0 +1,4 @@
+Modified the transaction handling in server/api.php to support partial success when processing a batch of SKUs.
+Instead of rolling back the entire transaction if some SKUs fail to be created, the transaction is now always committed, saving the successfully processed items.
+In case of partial failure, the API now returns a 207 Multi-Status code.
+The response body for partial failures has been updated to include both the processedSkus (with statuses 'exists' or 'created') and a detailed errors array, allowing the client to understand what succeeded and what failed.

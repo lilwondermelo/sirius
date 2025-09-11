@@ -1,0 +1,22 @@
+[2025-09-03 04:46:29] editProducts called. Decoded data: null
+[2025-09-03 04:47:31] editProducts called. Raw data parameter: ''
+[2025-09-03 04:51:21] _ajaxListener received POST: {"classFile":"app.class","class":"App","method":"getTypes"}
+[2025-09-03 04:51:21] _ajaxListener received POST: {"classFile":"app.class","class":"App","method":"getData","category":"0"}
+[2025-09-03 04:51:24] _ajaxListener received POST: {"classFile":"app.class","class":"App","method":"editProducts","id":"","name":"Умные часы 1"}
+[2025-09-03 04:51:24] editProducts called. Raw data parameter: ''
+[2025-09-03 09:35:24] _ajaxListener params: ["{\"id\":null,\"name\":\"\u041a\u0440\u0430\u043d\u0438\u0430\u043d \u043a\u0440\u0430\u043d\u044b\u04471 23\",\"type_id\":\"3\",\"unit_id\":\"1\"}"]
+[2025-09-03 09:35:28] _ajaxListener params: ["{\"category\":\"3\"}"]
+[2025-09-03 09:35:37] _ajaxListener params: ["{\"id\":null,\"name\":\"\u041a\u0440\u0430\u043d\u0438\u0430\u043d \u043a\u0440\u0430\u043d\u044b\u04471\",\"type_id\":\"3\",\"unit_id\":\"1\"}"]
+[2025-09-03 09:38:32] _ajaxListener params: ["{\"category\":0}"]
+[2025-09-03 09:38:32] _ajaxListener params: ["undefined"]
+[2025-09-03 09:38:33] _ajaxListener params: ["{\"category\":\"3\"}"]
+[2025-09-03 09:38:38] _ajaxListener params: ["{\"id\":null,\"name\":\"\u041a\u043d\u044b\u04471\",\"type_id\":\"3\",\"unit_id\":\"1\"}"]
+[2025-09-03 09:38:41] _ajaxListener params: ["{\"category\":\"3\"}"]
+[2025-09-03 09:39:13] _ajaxListener params: ["undefined"]
+[2025-09-03 09:39:13] _ajaxListener params: ["{\"category\":0}"]
+[2025-09-03 09:39:14] _ajaxListener params: ["{\"category\":\"3\"}"]
+[2025-09-03 09:39:18] _ajaxListener params: ["{\"id\":null,\"name\":\"\u041a\u044012321\u0430\u043d\u044b\u04471\",\"type_id\":\"3\",\"unit_id\":\"1\"}"]
+[2025-09-03 09:39:20] _ajaxListener params: ["{\"category\":\"3\"}"]
+[2025-09-03 09:39:46] _ajaxListener params: ["undefined"]
+[2025-09-03 09:39:46] _ajaxListener params: ["{\"category\":0}"]
+[2025-09-03 09:39:47] _ajaxListener params: ["{\"category\":\"3\"}"]

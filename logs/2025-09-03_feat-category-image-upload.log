@@ -1,0 +1,4 @@
+Added the ability to upload an image for a category in the category edit form.
+The backend now processes the uploaded image, saves it to `media/images/menu`, and updates the database.
+The frontend now displays a file input and an image preview in the category edit form.
+The AJAX request for saving a category now includes the image file.

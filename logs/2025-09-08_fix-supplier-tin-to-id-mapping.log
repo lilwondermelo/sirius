@@ -1,0 +1,5 @@
+Fixed a bug in server/api.php that caused an 'Unknown column \'supplier_tin\'' error.
+The code was incorrectly trying to use the supplier's TIN ('supplier_tin') directly in queries against the list_items table, which only contains 'supplier_id'.
+Implemented a lookup to fetch the correct 'supplier_id' from the 'suppliers' table based on the provided 'supplierTin'.
+Updated both the SELECT and INSERT queries to use the fetched 'supplier_id', ensuring correct database schema alignment.
+Corrected the bind_param types to match the new query structure.

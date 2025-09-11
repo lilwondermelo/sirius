@@ -1,0 +1,4 @@
+Fixed a bug in server/api.php that caused an error when creating new products from a supplier's SKU list.
+The INSERT query for new products in list_items was missing the name, supplier_product_name, and type_id fields.
+This likely caused a database trigger to fail, resulting in a misleading 'Unknown column \'price\' in \'field list\'' error.
+The query has been updated to include these fields, using the SKU for the name fields and a default type_id of 0.

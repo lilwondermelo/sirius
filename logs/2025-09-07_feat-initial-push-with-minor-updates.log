@@ -1,0 +1,3 @@
+This commit includes the initial push of the project to GitHub.
+It contains minor updates to `js/arrival-parser.js` and `logs/work.log`.
+A temporary Excel file in `docs/` was deleted, and a temporary git commit message file `COMMIT_MSG.tmp` is now untracked.

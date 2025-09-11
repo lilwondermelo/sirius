@@ -1,0 +1,3 @@
+Replaced the display of stock quantity with the vendor code in the product card.
+Fixed a "getItem is not defined" error that occurred when clicking on a product name to open the edit form.
+Fixed a "selectedImageFile is not defined" error when saving a product without changing the image.

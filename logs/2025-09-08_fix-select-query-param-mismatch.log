@@ -1,0 +1,3 @@
+Fixed a `mysqli_stmt::bind_param` error ("The number of variables must match the number of parameters in the prepared statement") in server/api.php.
+The `SELECT` query for matching SKUs was incorrectly missing the `AND supplier_id = ?` clause, leading to a mismatch with the `bind_param` call.
+Restored the `AND supplier_id = ?` clause to the `SELECT` query, ensuring the number of placeholders matches the number of parameters provided to `bind_param`.

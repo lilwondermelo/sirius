@@ -1,0 +1,9 @@
+Feature: Implement Excel upload for product arrivals
+
+- Added a feature to upload product arrival data from an Excel file (.xlsx).
+- Integrated the `SimpleXLSX` library for parsing Excel files.
+- Updated the "Arrivals" page with a file upload form.
+- Implemented backend logic to process the uploaded file, extract item data (vendor code, quantity, price), and match it with products in the database.
+- Added validation to ensure only `.xlsx` files are processed, providing a clear error message for other formats.
+- Fixed a critical bug in the AJAX listener (`_ajaxListener.class.php`) that prevented proper handling of `App` class methods and caused JSON parsing errors.
+- The listener now correctly handles methods for the main `App` class and avoids path resolution errors.

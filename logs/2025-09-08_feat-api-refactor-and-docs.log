@@ -1,0 +1,6 @@
+Refactored the external API to align with the project's architecture and added documentation.
+
+- Removed the standalone `server/api.php` endpoint to unify the API entry points.
+- Introduced a new method `handleExternalApi` in the `App` class (`server/app.class.php`) to process incoming data from external suppliers.
+- All API calls (internal and external) are now routed through the single `server/core/_ajaxListener.class.php` handler.
+- Added documentation for the external API to `README.md` and `GEMINI.md`, including a `cURL` example for usage.

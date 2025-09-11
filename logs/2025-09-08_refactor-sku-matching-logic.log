@@ -1,0 +1,5 @@
+Refactored the SKU matching logic in server/api.php based on new user requirements.
+Removed all functionality related to creating new products for unmatched SKUs. The application now only performs a SELECT operation to find existing items.
+Removed transaction handling (begin_transaction, commit, rollback) as it is no longer necessary for read-only operations.
+Simplified the response mechanism. The API now always returns a 200 OK status with success: true, providing a matchedSkus array containing the items that were found. Unmatched SKUs are ignored.
+If the supplier TIN is not found, the API now returns an empty matchedSkus array instead of an error, making the behavior more consistent.

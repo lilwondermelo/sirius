@@ -1,0 +1,5 @@
+Added a new `test_api.html` page to facilitate testing of the /server/api.php endpoint.
+The page includes a textarea for inputting a JSON request body and a button to send the request.
+The response from the server is displayed in a formatted `<pre>` block.
+The page uses jQuery for the AJAX call, consistent with the project's existing dependencies.
+Includes a default JSON example to simplify testing.

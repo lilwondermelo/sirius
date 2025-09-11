@@ -1,0 +1,5 @@
+Fixed a foreign key constraint violation in server/api.php that occurred during new product creation.
+The type_id was previously hardcoded to 0, which is not a valid foreign key in the list_types table.
+The code now dynamically fetches the first available id from list_types to use as a default type_id for new products.
+Added a check to ensure at least one type exists, returning an error if the list_types table is empty.
+Updated the INSERT query and bind_param to use this new dynamic type_id.
