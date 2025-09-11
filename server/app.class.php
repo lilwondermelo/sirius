@@ -655,13 +655,13 @@ class App {
             $db->sqlClose();
             return [
                 'supplierTin' => $supplier_tin,
-                'matchedProducts' => [],
-                'unmatchedItems' => array_filter(array_merge($skus, $names))
+                'matchedSkus' => [],
+                'unmatchedSkus' => array_filter(array_merge($skus, $names))
             ];
         }
 
-        $matched_products = [];
-        $unmatched_items = [];
+        $matched_skus = [];
+        $unmatched_skus = [];
         $items_count = max(count($skus), count($names));
 
         $stmt_select_sku = $mysqli->prepare("SELECT vendor_code FROM list_items WHERE supplier_code = ? AND supplier_id = ?");
@@ -689,9 +689,8 @@ class App {
                 $stmt_select_sku->execute();
                 $result = $stmt_select_sku->get_result();
                 if ($existing_item = $result->fetch_assoc()) {
-                    $matched_products[] = [
+                    $matched_skus[] = [
                         'supplier_sku' => $sku,
-                        'supplier_name' => $name,
                         'vendor_code' => $existing_item['vendor_code']
                     ];
                     $found = true;
@@ -704,9 +703,8 @@ class App {
                 $stmt_select_name->execute();
                 $result = $stmt_select_name->get_result();
                 if ($existing_item = $result->fetch_assoc()) {
-                    $matched_products[] = [
-                        'supplier_sku' => $sku,
-                        'supplier_name' => $name,
+                    $matched_skus[] = [
+                        'supplier_sku' => !empty($sku) ? $sku : $name, // use name as sku if sku is empty
                         'vendor_code' => $existing_item['vendor_code']
                     ];
                     $found = true;
@@ -714,7 +712,7 @@ class App {
             }
 
             if (!$found) {
-                $unmatched_items[] = !empty($sku) ? $sku : $name;
+                $unmatched_skus[] = !empty($sku) ? $sku : $name;
             }
         }
 
@@ -724,8 +722,8 @@ class App {
 
         return [
             'supplierTin' => $supplier_tin,
-            'matchedProducts' => $matched_products,
-            'unmatchedItems' => $unmatched_items
+            'matchedSkus' => $matched_skus,
+            'unmatchedSkus' => $unmatched_skus
         ];
     }
 
