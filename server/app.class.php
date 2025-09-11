@@ -727,6 +727,32 @@ class App {
         ];
     }
 
+    private function _getLatestItemPrice($itemId) {
+        require_once $this->root . '/server/core/_dataSource.class.php';
+        $query = "SELECT price FROM events_items_prices WHERE item_id = {$itemId} ORDER BY id DESC LIMIT 1";
+        $dataSource = new DataSource($query);
+        if ($responseData = $dataSource->getData()) {
+            if (isset($responseData[0]['price'])) {
+                return (float)$responseData[0]['price'];
+            }
+        }
+        return null;
+    }
+
+    private function _insertItemPrice($itemId, $price) {
+        require_once $this->root . '/server/core/_dataRowUpdater.class.php';
+        $priceUpdater = new DataRowUpdater('events_items_prices');
+        $priceData = [
+            'item_id' => $itemId,
+            'price' => $price
+        ];
+        if (!$priceUpdater->insert($priceData)) {
+            $this->error .= 'Failed to update price for item ' . $itemId . ': ' . $priceUpdater->error . '; ';
+            return false;
+        }
+        return true;
+    }
+
     public function handleExternalApiProductSync($jsonData) {
         $data = json_decode($jsonData, true);
         if (json_last_error() !== JSON_ERROR_NONE) {
@@ -777,7 +803,7 @@ class App {
             return false;
         }
 
-        $stats = ['created' => 0, 'existed' => 0, 'skipped' => 0, 'errors' => []];
+        $stats = ['created' => 0, 'existed' => 0, 'skipped' => 0, 'prices_updated' => 0, 'errors' => []];
 
         $stmt_check = $mysqli->prepare("SELECT id FROM list_items WHERE vendor_code = ?");
         $stmt_insert = $mysqli->prepare(
@@ -798,6 +824,7 @@ class App {
             $vendor_code = trim($product['Наш Артикул'] ?? '');
             $supplier_sku = trim($product['Артикул'] ?? '');
             $supplier_name = trim($product['Наименование товара'] ?? '');
+            $new_price = $product['Новая цена'] ?? null;
 
             if (empty($vendor_code)) {
                 $stats['skipped']++;
@@ -808,8 +835,20 @@ class App {
             $stmt_check->execute();
             $result = $stmt_check->get_result();
 
-            if ($result->num_rows > 0) {
+            if ($existing_item = $result->fetch_assoc()) {
                 $stats['existed']++;
+                
+                // Handle price update for existing item
+                if ($new_price !== null && is_numeric($new_price)) {
+                    $item_id = $existing_item['id'];
+                    $latest_price = $this->_getLatestItemPrice($item_id);
+
+                    if ($latest_price === null || (float)$new_price !== $latest_price) {
+                        if ($this->_insertItemPrice($item_id, (float)$new_price)) {
+                            $stats['prices_updated']++;
+                        }
+                    }
+                }
                 continue;
             }
 
@@ -826,6 +865,15 @@ class App {
             
             if ($stmt_insert->execute()) {
                 $stats['created']++;
+                $item_id = $stmt_insert->insert_id;
+
+                // Handle price for new item
+                if ($new_price !== null && is_numeric($new_price)) {
+                    if ($this->_insertItemPrice($item_id, (float)$new_price)) {
+                        // This price is for a new item, so it's not really an "update"
+                        // but we can count it if we want. Let's not for now.
+                    }
+                }
             } else {
                 $stats['errors'][] = "Failed to insert product at index {$index} ('{$vendor_code}'): " . $stmt_insert->error;
             }
