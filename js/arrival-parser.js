@@ -136,9 +136,11 @@ export async function checkDataAndSend(filename, supplierTin) {
         rowObj[String(header)] = rowArray[index];
       }
     });
+    const skuValue = rowObj[keys.sku];
+    const nameValue = rowObj[keys.name];
     return {
-      sku: rowObj[keys.sku],
-      name: rowObj[keys.name],
+      sku: typeof skuValue === 'string' ? skuValue.trim() : skuValue,
+      name: typeof nameValue === 'string' ? nameValue.trim() : nameValue,
       quantity: rowObj[keys.quantity],
       price: rowObj[keys.price],
       total: rowObj[keys.total]
