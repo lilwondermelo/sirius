@@ -737,14 +737,14 @@ class App {
         $unmatched_skus = [];
         $items_count = max(count($skus), count($names));
 
-        $stmt_select_sku = $mysqli->prepare("SELECT vendor_code FROM list_items WHERE supplier_code = ? AND supplier_id = ?");
+        $stmt_select_sku = $mysqli->prepare("SELECT vendor_code FROM list_items WHERE TRIM(supplier_code) = ? AND supplier_id = ?");
         if (!$stmt_select_sku) {
             $this->error = 'SKU query preparation failed: ' . $mysqli->error;
             $db->sqlClose();
             return false;
         }
 
-        $stmt_select_name = $mysqli->prepare("SELECT vendor_code FROM list_items WHERE supplier_product_name = ? AND supplier_id = ?");
+        $stmt_select_name = $mysqli->prepare("SELECT vendor_code FROM list_items WHERE TRIM(supplier_product_name) = ? AND supplier_id = ?");
         if (!$stmt_select_name) {
             $this->error = 'Name query preparation failed: ' . $mysqli->error;
             $db->sqlClose();
