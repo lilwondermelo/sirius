@@ -6,6 +6,30 @@ class App {
         $this->root = $_SERVER['DOCUMENT_ROOT'];
     }
 
+    private function _getCategoryPath($categoryId) {
+        if ($categoryId == 0) {
+            return '';
+        }
+    
+        require_once $this->root . '/server/core/_dataSource.class.php';
+        $query = 'SELECT name, parent_id FROM list_types WHERE id = ' . (int)$categoryId;
+        $dataSource = new DataSource($query);
+        $categoryData = $dataSource->getData();
+    
+        if (!$categoryData) {
+            return null; // Category not found
+        }
+    
+        $category = $categoryData[0];
+        $parentPath = $this->_getCategoryPath($category['parent_id']);
+    
+        if ($parentPath === null) {
+            return null; // Parent path not found
+        }
+    
+        return rtrim($parentPath, '/') . '/' . $category['name'];
+    }
+
 
     public function getUnits() {
         require_once $this->root . '/server/core/_dataSource.class.php';
@@ -86,6 +110,17 @@ class App {
                 return false;
             }
             $typeId = $newTypeId;
+
+            // Create directory for the new category
+            $parentPath = $this->_getCategoryPath($data['parent_id']);
+            if ($parentPath !== null) {
+                $newCategoryName = $data['name'];
+                $newPath = $this->root . '/media/images/items' . $parentPath . '/' . $newCategoryName;
+                if (!is_dir($newPath)) {
+                    mkdir($newPath, 0755, true);
+                }
+            }
+
         } else {
             // Update existing type
             $updater->setKey('id', $typeId);
