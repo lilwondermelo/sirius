@@ -22,9 +22,9 @@ error_reporting(E_ALL);
 		<div id="app_container">
 			<header>
 				<div class="header-actions">
+					<div class="main_title_button" id="auth_btn">Авторизация</div>
+					<div class="main_title_cart main_title_button">Корзина</div>
                     <div class="main_title_button admin-feature" id="admin_panel_btn" style="display: none;">Админ Панель</div>
-					<div class="main_title_cart"><img src="media/icons/cart.png" alt=""></div>
-                    <div class="main_title_button" id="auth_btn">Авторизация</div>
                     <div class="main_title_button" id="logout_btn" style="display: none;">Выйти</div>
 				</div>
 				<div class="flex_row main_menu_row" id="main_menu">

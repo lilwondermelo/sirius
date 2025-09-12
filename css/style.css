@@ -719,6 +719,7 @@ textarea.form-input {
     border-radius: 5px;
     font-size: 14px;
     align-self: center;
+    margin-bottom: 2px;
 }
 
 .main_title_button:hover {
