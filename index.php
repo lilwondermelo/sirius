@@ -6,7 +6,8 @@ error_reporting(E_ALL);
 <!DOCTYPE html>
 <html lang="ru">
 	<head>
-		<title>Конструктор данных</title>
+		<title>Сириус</title>
+		<link rel="icon" href="media/images/menu/0.png" type="image/png">
 		<link rel="stylesheet" href="css/style.css">
 		<script src="js/jquery-3.5.1.min.js"></script>
 		<script src="https://telegram.org/js/telegram-web-app.js"></script>
