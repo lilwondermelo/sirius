@@ -152,11 +152,9 @@ export async function checkDataAndSend(filename, supplierTin) {
       const num = Number(val);
       return !isNaN(num) && isFinite(num);
     };
-    const isHeader = normalize(String(p.sku)).includes(normalize(HEADER_SEARCH_TERMS.sku));
-    const isNumericSubHeader = /^[а-яА-Я]$/.test(normalize(String(p.sku)));
-    const hasTextData = p.name && p.sku;
+    const hasTextData = p.sku && String(p.sku).length > 2 && p.name && String(p.name).length > 2;
     const hasNumericData = isValidNumber(p.quantity) && isValidNumber(p.price);
-    return !isHeader && !isNumericSubHeader && hasTextData && hasNumericData;
+    return !isHeader && !isNumericSubHeader && hasTextData;
   });
 
   const productMappings = getMapping();
