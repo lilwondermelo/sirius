@@ -139,7 +139,7 @@ export async function checkDataAndSend(filename, supplierTin) {
     const skuValue = rowObj[keys.sku];
     const nameValue = rowObj[keys.name];
     return {
-      sku: 'TEST_' + (typeof skuValue === 'string' ? skuValue.trim() : skuValue),
+      sku: typeof skuValue === 'string' ? skuValue.trim() : skuValue,
       name: typeof nameValue === 'string' ? nameValue.trim() : nameValue,
       quantity: rowObj[keys.quantity],
       price: rowObj[keys.price],
@@ -152,9 +152,11 @@ export async function checkDataAndSend(filename, supplierTin) {
       const num = Number(val);
       return !isNaN(num) && isFinite(num);
     };
-    const hasTextData = p.sku && String(p.sku).length > 2 && p.name && String(p.name).length > 2;
+    const isHeader = normalize(String(p.sku)).includes(normalize(HEADER_SEARCH_TERMS.sku));
+    const isNumericSubHeader = /^[а-яА-Я]$/.test(normalize(String(p.sku)));
+    const hasTextData = p.name && p.sku;
     const hasNumericData = isValidNumber(p.quantity) && isValidNumber(p.price);
-    return !isHeader && !isNumericSubHeader && hasTextData;
+    return !isHeader && !isNumericSubHeader && hasTextData && hasNumericData;
   });
 
   const productMappings = getMapping();
