@@ -11,9 +11,9 @@ error_reporting(E_ALL);
 		<script src="js/jquery-3.5.1.min.js"></script>
 		<script src="https://telegram.org/js/telegram-web-app.js"></script>
 		<script src="js/cart.js"></script>
+		<script src="js/render.js"></script>
 		<script src="js/api.js"></script>
 		<script src="js/main.js"></script>
-		<script src="js/render.js"></script>
 		<script src="js/auth.js"></script>
 		<script src="js/event-listener.js"></script>
 	</head>

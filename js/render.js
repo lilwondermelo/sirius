@@ -24,7 +24,7 @@ function renderCart() {
             $("#main_table").append(`
                 <div class="cart_row">
                     <div>Код: ${item.id}</div>
-                    <div class="cart_img"><img src="media/images/items/${item.id}` + ((item.timestamp)?('_' + item.timestamp):'') +`.jpg" /></div>
+                    <div class="cart_img"><img src="${item.image_path}" /></div>
                     <div class="mobile cart_text">
                         <div class="clickable_name" item-id="${item.id}">${item.name}</div>
                         <div class="cart_price">${price}</div>
@@ -110,7 +110,7 @@ function renderCard(item) {
     const in_cart = cart.find(item_in_cart => item_in_cart.id == item.id);
     $("#main_table").append(' ' + 
             '<div class="flex_row_item">' +
-                '<div class="flex_row_item_img"><img src="media/images/items/' + item.id + ((item.timestamp)?('_' + item.timestamp):'') + '.jpg" alt=""></div>' + 
+                '<div class="flex_row_item_img"><img src="' + item.image_path + '" alt=""></div>' + 
                 '<div class="flex_row_item_name" item-id="' + item.id + '"><span>' + item.name + '</span></div>' + 
                 '<div class="flex_row_item_amount">' + item.vendor_code + '</div>' + 
                 '<div class="flex_row_item_price">' + item.price + '</div>' + 
@@ -126,8 +126,8 @@ function renderCard(item) {
 function renderItem(item) {
     showMainContent();
     $("#main_table").html(' ' + 
-    '<div class="item" item-id="' + item.id + ((item.timestamp)?('_' + item.timestamp):'') + '">' +
-        '<div class="item_img"><img src="media/images/items/' + item.id + '.jpg" alt=""></div>' + 
+    '<div class="item" item-id="' + item.id + '">' +
+        '<div class="item_img"><img src="' + item.image_path + '" alt=""></div>' + 
         '<div class="item_name" item-id="' + item.id + '">' + item.name + '</div>' + 
         '<div class="item_amount">' + item.vendor_code + '</div>' + 
         '<div class="item_price">' + item.price + '</div>' + 
@@ -138,8 +138,7 @@ function renderItem(item) {
 function renderItemEdit(item) {
     showMainContent();
     const itemId = item ? item.id : 0;
-    const timestamp = item ? (item.timestamp ? '_' + item.timestamp : '') : '';
-    const imageUrl = `media/images/items/${itemId}${timestamp}.jpg`;
+    const imageUrl = item ? item.image_path : '/media/images/system/bgr.png';
 
     // Загружаем список единиц измерения, категорий и поставщиков параллельно
     const unitsPromise = smartAjaxCall({

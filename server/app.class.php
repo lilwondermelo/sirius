@@ -140,7 +140,7 @@ class App {
             eip.price AS price,
             lu.name as unit
         FROM list_items li
-        LEFT JOIN (
+        LEFT JOIN ( 
             SELECT item_id, MAX(id) AS max_price_id
             FROM events_items_prices
             GROUP BY item_id
@@ -177,7 +177,45 @@ class App {
             return [];
         }
 
+        foreach ($responseData as &$item) {
+            $item['image_path'] = $this->_findImage($item['vendor_code']);
+        }
+
         return $responseData;
+    }
+
+    private function _findImage($sku) {
+        $baseDir = $this->root . '/media/images/items/';
+        
+        // Handle potential empty SKU
+        if (empty($sku)) {
+            return '/media/images/system/bgr.png';
+        }
+    
+        $iterator = new RecursiveIteratorIterator(
+            new RecursiveDirectoryIterator($baseDir, RecursiveDirectoryIterator::SKIP_DOTS),
+            RecursiveIteratorIterator::SELF_FIRST
+        );
+    
+        $allowedExtensions = ['jpg', 'jpeg', 'png', 'gif', 'webp'];
+    
+        foreach ($iterator as $file) {
+            if ($file->isDir()) {
+                continue;
+            }
+    
+            $filenameWithoutExt = pathinfo($file->getFilename(), PATHINFO_FILENAME);
+            $extension = strtolower(pathinfo($file->getFilename(), PATHINFO_EXTENSION));
+    
+            if ($filenameWithoutExt === $sku && in_array($extension, $allowedExtensions)) {
+                $fullPath = $file->getPathname();
+                $urlPath = str_replace($this->root, '', $fullPath);
+                $urlPath = str_replace('\\', '/', $urlPath); // Corrected escaping for backslash
+                return $urlPath;
+            }
+        }
+    
+        return '/media/images/system/bgr.png'; // Default image
     }
 
 
