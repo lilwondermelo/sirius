@@ -139,7 +139,7 @@ export async function checkDataAndSend(filename, supplierTin) {
     const skuValue = rowObj[keys.sku];
     const nameValue = rowObj[keys.name];
     return {
-      sku: typeof skuValue === 'string' ? skuValue.trim() : skuValue,
+      sku: 'TEST_' + (typeof skuValue === 'string' ? skuValue.trim() : skuValue),
       name: typeof nameValue === 'string' ? nameValue.trim() : nameValue,
       quantity: rowObj[keys.quantity],
       price: rowObj[keys.price],
